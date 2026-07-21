@@ -190,6 +190,18 @@
   #currentBtns #curDone { grid-column: 1 / -1; background: var(--accent); color: #fff; padding: 15px 0; font-size: 1.05rem; }
   #currentBtns #curReduce { grid-column: 1 / -1; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
   #currentEmpty { text-align: center; color: var(--muted); padding: 46px 10px; font-size: 0.95rem; line-height: 1.6; }
+  #backupBtns { display: none; margin-top: 18px; }
+  #backupBtns.show { display: block; }
+  #backupNowBtn {
+    width: 100%;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 0;
+    font-size: 1.05rem;
+    font-weight: 650;
+  }
 
   /* ---------- add page ---------- */
   #addBox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
@@ -396,6 +408,9 @@
       <button id="cur1m">1 Month</button>
       <button id="curReduce">Reduce Priority</button>
     </div>
+    <div id="backupBtns">
+      <button id="backupNowBtn">✉ Email backup</button>
+    </div>
   </div>
   <div id="currentEmpty" hidden></div>
 </div>
@@ -498,7 +513,8 @@
 "use strict";
 
 const STORE_KEY = "todo.v1";
-const BACKUP_REMIND_MS = 48 * 60 * 60 * 1000; // remind after 2 days of unbacked-up changes
+const BACKUP_REMIND_MS = 48 * 60 * 60 * 1000; // remind when the last backup is older than 2 days
+const BACKUP_EMAIL = "hughnorton7@gmail.com";
 const TAGS = ["Admin", "Reading", "Watching"];
 const HOUR = 3600 * 1000, DAY = 24 * HOUR, WEEK = 7 * DAY, MONTH = 30 * DAY;
 
@@ -568,6 +584,12 @@ function effPrio(item) {
 
 function byId(id) {
   return state.items.find(i => i.id === id);
+}
+
+// Backup is due when there are unbacked-up changes and the last backup is over 48h old (or never happened).
+function backupOverdue() {
+  return state.items.length > 0 && !!state.dirtySince &&
+    (!state.lastBackupAt || Date.now() - state.lastBackupAt > BACKUP_REMIND_MS);
 }
 
 // ---------- shared widgets ----------
@@ -640,6 +662,32 @@ function pickCurrent() {
 function renderCurrent() {
   const card = document.getElementById("currentCard");
   const empty = document.getElementById("currentEmpty");
+  const taskBtns = document.getElementById("currentBtns");
+  const backupBtns = document.getElementById("backupBtns");
+
+  if (backupOverdue()) {
+    card.style.display = "block";
+    empty.hidden = true;
+    taskBtns.style.display = "none";
+    backupBtns.classList.add("show");
+    const prio = document.getElementById("currentPrio");
+    prio.className = "prio pTop";
+    prio.textContent = "⚠";
+    document.getElementById("currentTags").innerHTML = "";
+    const nameBtn = document.getElementById("currentName");
+    nameBtn.textContent = "Backup To Do List";
+    nameBtn.onclick = null;
+    const det = document.getElementById("currentDetails");
+    det.textContent = state.lastBackupAt
+      ? "Last backup was " + new Date(state.lastBackupAt).toLocaleString() + " and you've made changes since. Email yourself a fresh backup to get back to your tasks."
+      : "You've never backed up. Email yourself a backup to get back to your tasks.";
+    det.style.display = "block";
+    document.getElementById("backupNowBtn").onclick = emailBackup;
+    return;
+  }
+  taskBtns.style.display = "";
+  backupBtns.classList.remove("show");
+
   const item = pickCurrent();
 
   if (!item) {
@@ -924,25 +972,12 @@ function backupDone() {
   render();
 }
 
-async function emailBackup() {
+function emailBackup() {
   const json = backupPayload();
   const dateStr = new Date().toISOString().slice(0, 10);
-  const file = new File([json], "todo-backup-" + dateStr + ".json", { type: "application/json" });
-
-  // Preferred: iOS share sheet with the backup attached as a file (pick Mail there).
-  if (navigator.canShare && navigator.canShare({ files: [file] })) {
-    try {
-      await navigator.share({ files: [file], title: "To-Do backup " + dateStr });
-      backupDone();
-      toast("Backup shared — send it to yourself to finish.");
-    } catch (e) { /* user cancelled the share sheet; not backed up */ }
-    return;
-  }
-
-  // Fallback: open an email with the backup as plain text in the body.
   const subject = encodeURIComponent("To-Do backup " + dateStr);
   const body = encodeURIComponent("Keep this email. To restore, copy everything between the lines into the app's Restore box.\n\n-----\n" + json + "\n-----\n");
-  location.href = "mailto:?subject=" + subject + "&body=" + body;
+  location.href = "mailto:" + BACKUP_EMAIL + "?subject=" + subject + "&body=" + body;
   backupDone();
   toast("Backup email opened — remember to hit send.");
 }
@@ -994,13 +1029,14 @@ function renderBackupInfo() {
   }
 
   const banner = document.getElementById("backupBanner");
-  const overdue = state.dirtySince && (Date.now() - state.dirtySince > BACKUP_REMIND_MS) && state.items.length > 0;
-  if (overdue) {
-    const days = Math.floor((Date.now() - state.dirtySince) / DAY);
-    document.getElementById("backupBannerMsg").textContent =
-      "You have changes from " + (days <= 1 ? "over a day" : days + " days") + " ago that aren't backed up.";
+  // The Current tab shows the backup pseudo-task instead, so no banner there.
+  const showBanner = backupOverdue() && activeTab !== "current";
+  if (showBanner) {
+    document.getElementById("backupBannerMsg").textContent = state.lastBackupAt
+      ? "Last backup was " + Math.floor((Date.now() - state.lastBackupAt) / DAY) + "+ days ago and you have new changes."
+      : "You haven't backed up yet.";
   }
-  banner.classList.toggle("show", !!overdue);
+  banner.classList.toggle("show", showBanner);
 }
 
 // ---------- tabs / render ----------
