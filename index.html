@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="To Do">
+<meta name="theme-color" content="#4f46e5">
+<title>To Do</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+
+<style>
+  :root {
+    --bg: #f4f4f8;
+    --card: #ffffff;
+    --text: #1c1c2e;
+    --muted: #8a8aa0;
+    --accent: #4f46e5;
+    --accent-soft: #eef0ff;
+    --danger: #dc2626;
+    --warn-bg: #fff7e6;
+    --warn-border: #f0c36d;
+    --warn-text: #7a5c00;
+    --line: #e7e7ef;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #101018;
+      --card: #1c1c28;
+      --text: #f0f0f6;
+      --muted: #9a9ab0;
+      --accent: #7c74ff;
+      --accent-soft: #26263e;
+      --danger: #f87171;
+      --warn-bg: #2e2610;
+      --warn-border: #6e5a1e;
+      --warn-text: #e8c96a;
+      --line: #2c2c3c;
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html, body { height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 24px);
+    max-width: 560px;
+    margin: 0 auto;
+    -webkit-font-smoothing: antialiased;
+  }
+  header { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+  header h1 { font-size: 1.7rem; letter-spacing: -0.02em; }
+  #dateLabel { color: var(--muted); font-size: 0.85rem; }
+
+  #backupBanner {
+    display: none;
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    color: var(--warn-text);
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-bottom: 14px;
+    font-size: 0.9rem;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  #backupBanner.show { display: flex; }
+  #backupBanner button {
+    background: var(--warn-text);
+    color: var(--warn-bg);
+    border: none;
+    border-radius: 8px;
+    padding: 6px 12px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  #addRow { display: flex; gap: 8px; margin-bottom: 18px; }
+  #newItem {
+    flex: 1;
+    font-size: 1rem;
+    padding: 13px 16px;
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    background: var(--card);
+    color: var(--text);
+    outline: none;
+  }
+  #newItem:focus { border-color: var(--accent); }
+  #addBtn {
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 14px;
+    width: 50px;
+    font-size: 1.5rem;
+    font-weight: 500;
+    flex-shrink: 0;
+  }
+
+  ul { list-style: none; }
+  li.item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 13px 14px;
+    margin-bottom: 8px;
+  }
+  li.item .check {
+    width: 26px; height: 26px;
+    border: 2px solid var(--muted);
+    border-radius: 50%;
+    background: none;
+    flex-shrink: 0;
+    color: transparent;
+    font-size: 15px;
+    line-height: 1;
+  }
+  li.item.done .check { background: var(--accent); border-color: var(--accent); color: #fff; }
+  li.item .label { flex: 1; font-size: 1rem; word-break: break-word; }
+  li.item.done .label { color: var(--muted); text-decoration: line-through; }
+  li.item .del {
+    background: none; border: none;
+    color: var(--muted);
+    font-size: 1.1rem;
+    padding: 4px 6px;
+    flex-shrink: 0;
+  }
+  #emptyMsg { color: var(--muted); text-align: center; padding: 30px 0; font-size: 0.95rem; }
+
+  #doneHeader {
+    display: none;
+    width: 100%;
+    background: none; border: none;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-align: left;
+    padding: 14px 4px 8px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  #doneHeader.show { display: block; }
+  #doneList.collapsed { display: none; }
+
+  #toolsToggle {
+    display: block;
+    margin: 26px auto 0;
+    background: none; border: none;
+    color: var(--muted);
+    font-size: 0.9rem;
+    text-decoration: underline;
+    padding: 8px;
+  }
+  #tools { display: none; margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
+  #tools.show { display: block; }
+  #tools h2 { font-size: 1rem; margin-bottom: 4px; }
+  #tools p.hint { color: var(--muted); font-size: 0.82rem; margin-bottom: 10px; }
+  #tools .btnRow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+  #tools button.action {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border: none;
+    border-radius: 10px;
+    padding: 9px 14px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+  #restoreText {
+    width: 100%;
+    min-height: 70px;
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 0.8rem;
+    font-family: ui-monospace, Menlo, monospace;
+    padding: 8px;
+    margin-bottom: 8px;
+  }
+  #toast {
+    position: fixed;
+    bottom: calc(env(safe-area-inset-bottom) + 20px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--text);
+    color: var(--bg);
+    padding: 10px 18px;
+    border-radius: 12px;
+    font-size: 0.9rem;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s;
+    max-width: 90%;
+    text-align: center;
+  }
+  #toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>To Do</h1>
+  <span id="dateLabel"></span>
+</header>
+
+<div id="backupBanner">
+  <span id="backupBannerMsg"></span>
+  <button id="bannerBackupBtn">Back up</button>
+</div>
+
+<div id="addRow">
+  <input id="newItem" type="text" placeholder="Add a task…" autocomplete="off" enterkeyhint="done">
+  <button id="addBtn" aria-label="Add task">+</button>
+</div>
+
+<ul id="activeList"></ul>
+<p id="emptyMsg" hidden>Nothing to do — add your first task above.</p>
+<button id="doneHeader">Completed (<span id="doneCount">0</span>) — tap to show/hide</button>
+<ul id="doneList" class="collapsed"></ul>
+
+<button id="toolsToggle">Backup &amp; restore</button>
+<div id="tools">
+  <h2>Back up</h2>
+  <p class="hint" id="backupStatus"></p>
+  <div class="btnRow">
+    <button class="action" id="emailBackupBtn">Email backup</button>
+    <button class="action" id="downloadBackupBtn">Save as file</button>
+  </div>
+  <h2>Restore</h2>
+  <p class="hint">Paste the backup text from your email (or choose a backup file), then tap Restore. This replaces the current list.</p>
+  <textarea id="restoreText" placeholder='Paste backup here, e.g. {"app":"todo", ...}'></textarea>
+  <div class="btnRow">
+    <button class="action" id="restoreBtn">Restore from pasted text</button>
+    <button class="action" id="restoreFileBtn">Choose backup file…</button>
+    <input id="restoreFile" type="file" accept=".json,.txt,application/json,text/plain" hidden>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+
+const STORE_KEY = "todo.v1";
+const BACKUP_REMIND_MS = 48 * 60 * 60 * 1000; // remind after 2 days of unbacked-up changes
+
+let state = load();
+
+function load() {
+  try {
+    const raw = localStorage.getItem(STORE_KEY);
+    if (raw) {
+      const s = JSON.parse(raw);
+      if (Array.isArray(s.items)) return s;
+    }
+  } catch (e) { /* fall through to fresh state */ }
+  return { items: [], lastBackupAt: null, dirtySince: null };
+}
+
+function save() {
+  localStorage.setItem(STORE_KEY, JSON.stringify(state));
+}
+
+function markDirty() {
+  if (!state.dirtySince) state.dirtySince = Date.now();
+  save();
+}
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
+// ---------- rendering ----------
+
+const activeList = document.getElementById("activeList");
+const doneList = document.getElementById("doneList");
+const emptyMsg = document.getElementById("emptyMsg");
+const doneHeader = document.getElementById("doneHeader");
+const doneCount = document.getElementById("doneCount");
+
+function render() {
+  activeList.innerHTML = "";
+  doneList.innerHTML = "";
+  const active = state.items.filter(i => !i.done);
+  const done = state.items.filter(i => i.done);
+
+  for (const item of active) activeList.appendChild(renderItem(item));
+  for (const item of done) doneList.appendChild(renderItem(item));
+
+  emptyMsg.hidden = active.length > 0;
+  doneCount.textContent = done.length;
+  doneHeader.classList.toggle("show", done.length > 0);
+  renderBackupInfo();
+}
+
+function renderItem(item) {
+  const li = document.createElement("li");
+  li.className = "item" + (item.done ? " done" : "");
+
+  const check = document.createElement("button");
+  check.className = "check";
+  check.setAttribute("aria-label", item.done ? "Mark as not done" : "Mark as done");
+  check.textContent = "✓";
+  check.onclick = () => toggle(item.id);
+
+  const label = document.createElement("span");
+  label.className = "label";
+  label.textContent = item.text;
+
+  const del = document.createElement("button");
+  del.className = "del";
+  del.setAttribute("aria-label", "Delete task");
+  del.textContent = "✕";
+  del.onclick = () => remove(item.id);
+
+  li.append(check, label, del);
+  return li;
+}
+
+function renderBackupInfo() {
+  const status = document.getElementById("backupStatus");
+  if (state.lastBackupAt) {
+    status.textContent = "Last backup: " + new Date(state.lastBackupAt).toLocaleString();
+  } else {
+    status.textContent = "Never backed up yet.";
+  }
+
+  const banner = document.getElementById("backupBanner");
+  const overdue = state.dirtySince && (Date.now() - state.dirtySince > BACKUP_REMIND_MS) && state.items.length > 0;
+  if (overdue) {
+    const days = Math.floor((Date.now() - state.dirtySince) / (24 * 60 * 60 * 1000));
+    document.getElementById("backupBannerMsg").textContent =
+      "You have changes from " + (days <= 1 ? "over a day" : days + " days") + " ago that aren't backed up.";
+  }
+  banner.classList.toggle("show", !!overdue);
+}
+
+// ---------- actions ----------
+
+function addItem() {
+  const input = document.getElementById("newItem");
+  const text = input.value.trim();
+  if (!text) return;
+  state.items.unshift({ id: uid(), text, done: false, createdAt: Date.now(), completedAt: null });
+  input.value = "";
+  markDirty();
+  render();
+  input.focus();
+}
+
+function toggle(id) {
+  const item = state.items.find(i => i.id === id);
+  if (!item) return;
+  item.done = !item.done;
+  item.completedAt = item.done ? Date.now() : null;
+  markDirty();
+  render();
+}
+
+function remove(id) {
+  state.items = state.items.filter(i => i.id !== id);
+  markDirty();
+  render();
+}
+
+// ---------- backup / restore ----------
+
+function backupPayload() {
+  return JSON.stringify({ app: "todo", version: 1, exportedAt: new Date().toISOString(), items: state.items });
+}
+
+function backupDone() {
+  state.lastBackupAt = Date.now();
+  state.dirtySince = null;
+  save();
+  render();
+}
+
+async function emailBackup() {
+  const json = backupPayload();
+  const dateStr = new Date().toISOString().slice(0, 10);
+  const file = new File([json], "todo-backup-" + dateStr + ".json", { type: "application/json" });
+
+  // Preferred: iOS share sheet with the backup attached as a file (pick Mail there).
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: "To-Do backup " + dateStr });
+      backupDone();
+      toast("Backup shared — send it to yourself to finish.");
+    } catch (e) { /* user cancelled the share sheet; not backed up */ }
+    return;
+  }
+
+  // Fallback: open an email with the backup as plain text in the body.
+  const subject = encodeURIComponent("To-Do backup " + dateStr);
+  const body = encodeURIComponent("Keep this email. To restore, copy everything between the lines into the app's Restore box.\n\n-----\n" + json + "\n-----\n");
+  location.href = "mailto:?subject=" + subject + "&body=" + body;
+  backupDone();
+  toast("Backup email opened — remember to hit send.");
+}
+
+function downloadBackup() {
+  const blob = new Blob([backupPayload()], { type: "application/json" });
+  const a = document.createElement("a");
+  a.href = URL.createObjectURL(blob);
+  a.download = "todo-backup-" + new Date().toISOString().slice(0, 10) + ".json";
+  a.click();
+  URL.revokeObjectURL(a.href);
+  backupDone();
+  toast("Backup file saved.");
+}
+
+function restoreFromText(text) {
+  let parsed;
+  // Accept either raw JSON or an email body with the JSON between ----- lines.
+  const fenced = text.match(/-----\s*([\s\S]*?)\s*-----/);
+  const candidate = (fenced ? fenced[1] : text).trim();
+  try {
+    parsed = JSON.parse(candidate);
+  } catch (e) {
+    toast("That doesn't look like a valid backup.");
+    return;
+  }
+  const items = Array.isArray(parsed) ? parsed : parsed.items;
+  if (!Array.isArray(items) || !items.every(i => i && typeof i.text === "string")) {
+    toast("That doesn't look like a valid backup.");
+    return;
+  }
+  const ok = confirm("Replace your current list (" + state.items.length + " items) with the backup (" + items.length + " items)?");
+  if (!ok) return;
+  state.items = items.map(i => ({
+    id: typeof i.id === "string" ? i.id : uid(),
+    text: i.text,
+    done: !!i.done,
+    createdAt: i.createdAt || Date.now(),
+    completedAt: i.completedAt || null,
+  }));
+  markDirty();
+  render();
+  document.getElementById("restoreText").value = "";
+  toast("Restored " + items.length + " items.");
+}
+
+// ---------- misc ----------
+
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById("toast");
+  el.textContent = msg;
+  el.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
+}
+
+// ---------- wire up ----------
+
+document.getElementById("addBtn").onclick = addItem;
+document.getElementById("newItem").addEventListener("keydown", e => { if (e.key === "Enter") addItem(); });
+document.getElementById("doneHeader").onclick = () => doneList.classList.toggle("collapsed");
+document.getElementById("toolsToggle").onclick = () => document.getElementById("tools").classList.toggle("show");
+document.getElementById("emailBackupBtn").onclick = emailBackup;
+document.getElementById("bannerBackupBtn").onclick = emailBackup;
+document.getElementById("downloadBackupBtn").onclick = downloadBackup;
+document.getElementById("restoreBtn").onclick = () => restoreFromText(document.getElementById("restoreText").value);
+document.getElementById("restoreFileBtn").onclick = () => document.getElementById("restoreFile").click();
+document.getElementById("restoreFile").addEventListener("change", e => {
+  const f = e.target.files[0];
+  if (!f) return;
+  const reader = new FileReader();
+  reader.onload = () => restoreFromText(String(reader.result));
+  reader.readAsText(f);
+  e.target.value = "";
+});
+
+document.getElementById("dateLabel").textContent =
+  new Date().toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
+
+render();
+
+if ("serviceWorker" in navigator) {
+  navigator.serviceWorker.register("sw.js");
+}
+</script>
+</body>
+</html>
