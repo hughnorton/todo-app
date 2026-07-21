@@ -972,9 +972,23 @@ function backupDone() {
   render();
 }
 
-function emailBackup() {
+async function emailBackup() {
   const json = backupPayload();
   const dateStr = new Date().toISOString().slice(0, 10);
+  const file = new File([json], "todo-backup-" + dateStr + ".json", { type: "application/json" });
+
+  // Preferred: iOS share sheet with the backup attached as a JSON file — pick Mail there.
+  // (The share sheet can't pre-fill a recipient; the attachment is worth that trade-off.)
+  if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    try {
+      await navigator.share({ files: [file], title: "To-Do backup " + dateStr });
+      backupDone();
+      toast("Backup shared — send it to " + BACKUP_EMAIL + " to finish.");
+    } catch (e) { /* user cancelled the share sheet; not backed up */ }
+    return;
+  }
+
+  // Fallback for browsers without file sharing: email with the backup as text in the body.
   const subject = encodeURIComponent("To-Do backup " + dateStr);
   const body = encodeURIComponent("Keep this email. To restore, copy everything between the lines into the app's Restore box.\n\n-----\n" + json + "\n-----\n");
   location.href = "mailto:" + BACKUP_EMAIL + "?subject=" + subject + "&body=" + body;
