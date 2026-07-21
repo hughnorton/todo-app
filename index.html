@@ -26,6 +26,10 @@
     --warn-border: #f0c36d;
     --warn-text: #7a5c00;
     --line: #e7e7ef;
+    --p1: #dc2626;
+    --p2: #ea770b;
+    --p3: #4f46e5;
+    --p45: #8a8aa0;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -40,6 +44,10 @@
       --warn-border: #6e5a1e;
       --warn-text: #e8c96a;
       --line: #2c2c3c;
+      --p1: #f87171;
+      --p2: #fb923c;
+      --p3: #7c74ff;
+      --p45: #9a9ab0;
     }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -48,7 +56,7 @@
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
     background: var(--bg);
     color: var(--text);
-    padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 24px);
+    padding: calc(env(safe-area-inset-top) + 16px) 16px calc(env(safe-area-inset-bottom) + 86px);
     max-width: 560px;
     margin: 0 auto;
     -webkit-font-smoothing: antialiased;
@@ -82,38 +90,124 @@
     flex-shrink: 0;
   }
 
-  #addRow { display: flex; gap: 8px; margin-bottom: 18px; }
+  .page { display: none; }
+  .page.show { display: block; }
+
+  /* ---------- shared bits ---------- */
+  .prio {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 30px;
+    height: 22px;
+    border-radius: 7px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: #fff;
+    flex-shrink: 0;
+  }
+  .prio.pTop { background: var(--p1); }
+  .prio.pHigh { background: var(--p2); }
+  .prio.pMid { background: var(--p3); }
+  .prio.pLow { background: var(--p45); }
+
+  .chip {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    border-radius: 999px;
+    padding: 6px 13px;
+    font-size: 0.84rem;
+    font-weight: 600;
+  }
+  .chip.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+  .chipRow { display: flex; flex-wrap: wrap; gap: 7px; }
+
+  .tagList { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tagList span {
+    background: var(--accent-soft);
+    color: var(--accent);
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .snoozeNote { color: var(--muted); font-size: 0.75rem; }
+
+  .seg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
+  .seg button {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    border-radius: 9px;
+    padding: 8px 0;
+    font-size: 0.9rem;
+    font-weight: 700;
+  }
+  .seg button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* ---------- current page ---------- */
+  #currentCard {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    padding: 22px 18px;
+    margin-top: 6px;
+  }
+  #currentCard .topRow { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  #currentName { font-size: 1.35rem; font-weight: 650; line-height: 1.3; word-break: break-word; margin-bottom: 8px; }
+  #currentDetails { color: var(--muted); font-size: 0.95rem; white-space: pre-wrap; word-break: break-word; margin: 10px 0 2px; }
+  #currentBtns { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 18px; }
+  #currentBtns button {
+    border: none;
+    border-radius: 12px;
+    padding: 14px 0;
+    font-size: 0.95rem;
+    font-weight: 650;
+    background: var(--accent-soft);
+    color: var(--accent);
+  }
+  #currentBtns #curDone { grid-column: 1 / -1; background: var(--accent); color: #fff; padding: 15px 0; font-size: 1.05rem; }
+  #currentBtns #curReduce { grid-column: 1 / -1; background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+  #currentEmpty { text-align: center; color: var(--muted); padding: 46px 10px; font-size: 0.95rem; line-height: 1.6; }
+
+  /* ---------- tasks page ---------- */
+  #addBox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 12px; margin-bottom: 16px; }
+  #addRow { display: flex; gap: 8px; }
   #newItem {
     flex: 1;
     font-size: 1rem;
-    padding: 13px 16px;
+    padding: 12px 14px;
     border: 1px solid var(--line);
-    border-radius: 14px;
-    background: var(--card);
+    border-radius: 12px;
+    background: var(--bg);
     color: var(--text);
     outline: none;
+    min-width: 0;
   }
   #newItem:focus { border-color: var(--accent); }
   #addBtn {
     background: var(--accent);
     color: #fff;
     border: none;
-    border-radius: 14px;
-    width: 50px;
+    border-radius: 12px;
+    width: 48px;
     font-size: 1.5rem;
-    font-weight: 500;
     flex-shrink: 0;
   }
+  #addBox .optLabel { color: var(--muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 12px 0 6px; }
+
+  #filterRow { margin-bottom: 12px; }
 
   ul { list-style: none; }
   li.item {
     display: flex;
     align-items: center;
-    gap: 12px;
+    gap: 11px;
     background: var(--card);
     border: 1px solid var(--line);
     border-radius: 14px;
-    padding: 13px 14px;
+    padding: 12px 13px;
     margin-bottom: 8px;
   }
   li.item .check {
@@ -127,15 +221,10 @@
     line-height: 1;
   }
   li.item.done .check { background: var(--accent); border-color: var(--accent); color: #fff; }
-  li.item .label { flex: 1; font-size: 1rem; word-break: break-word; }
-  li.item.done .label { color: var(--muted); text-decoration: line-through; }
-  li.item .del {
-    background: none; border: none;
-    color: var(--muted);
-    font-size: 1.1rem;
-    padding: 4px 6px;
-    flex-shrink: 0;
-  }
+  li.item .mid { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+  li.item .name { font-size: 1rem; word-break: break-word; text-align: left; background: none; border: none; color: var(--text); padding: 0; }
+  li.item.done .name { color: var(--muted); text-decoration: line-through; }
+  li.item.snoozed { opacity: 0.62; }
   #emptyMsg { color: var(--muted); text-align: center; padding: 30px 0; font-size: 0.95rem; }
 
   #doneHeader {
@@ -152,6 +241,8 @@
   }
   #doneHeader.show { display: block; }
   #doneList.collapsed { display: none; }
+  #clearDoneBtn { display: none; margin: 4px auto 0; background: none; border: none; color: var(--muted); font-size: 0.85rem; text-decoration: underline; padding: 6px; }
+  #clearDoneBtn.show { display: block; }
 
   #toolsToggle {
     display: block;
@@ -167,7 +258,7 @@
   #tools h2 { font-size: 1rem; margin-bottom: 4px; }
   #tools p.hint { color: var(--muted); font-size: 0.82rem; margin-bottom: 10px; }
   #tools .btnRow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
-  #tools button.action {
+  #tools button.action, #detailSheet button.action {
     background: var(--accent-soft);
     color: var(--accent);
     border: none;
@@ -188,9 +279,80 @@
     padding: 8px;
     margin-bottom: 8px;
   }
+
+  /* ---------- detail sheet ---------- */
+  #overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.45);
+    display: none;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 40;
+  }
+  #overlay.show { display: flex; }
+  #detailSheet {
+    background: var(--card);
+    width: 100%;
+    max-width: 560px;
+    max-height: 88vh;
+    overflow-y: auto;
+    border-radius: 20px 20px 0 0;
+    padding: 18px 18px calc(env(safe-area-inset-bottom) + 18px);
+  }
+  #detailSheet .sheetHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  #detailSheet .sheetHead h2 { font-size: 1.15rem; }
+  #closeSheet { background: none; border: none; color: var(--muted); font-size: 1.5rem; padding: 2px 8px; }
+  #detailSheet label.fieldLabel { display: block; color: var(--muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 14px 0 6px; }
+  #dName, #dDetails {
+    width: 100%;
+    font-size: 1rem;
+    padding: 11px 13px;
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    font-family: inherit;
+  }
+  #dName:focus, #dDetails:focus { border-color: var(--accent); }
+  #dDetails { min-height: 90px; resize: vertical; }
+  #dSnoozeRow { display: none; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 11px; padding: 10px 12px; font-size: 0.85rem; color: var(--muted); }
+  #dSnoozeRow.show { display: flex; }
+  #dMeta { color: var(--muted); font-size: 0.78rem; margin-top: 14px; }
+  #sheetBtns { display: flex; gap: 9px; margin-top: 18px; }
+  #dSave { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 14px 0; font-size: 1rem; font-weight: 650; }
+  #dDelete { background: none; border: 1px solid var(--line); color: var(--danger); border-radius: 12px; padding: 14px 18px; font-size: 0.95rem; font-weight: 600; }
+
+  /* ---------- tab bar ---------- */
+  #tabbar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: var(--card);
+    border-top: 1px solid var(--line);
+    display: flex;
+    padding: 6px 0 calc(env(safe-area-inset-bottom) + 6px);
+    z-index: 30;
+  }
+  #tabbar button {
+    flex: 1;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 0.8rem;
+    font-weight: 650;
+    padding: 7px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+  }
+  #tabbar button .ico { font-size: 1.25rem; line-height: 1; }
+  #tabbar button.on { color: var(--accent); }
+
   #toast {
     position: fixed;
-    bottom: calc(env(safe-area-inset-bottom) + 20px);
+    bottom: calc(env(safe-area-inset-bottom) + 88px);
     left: 50%;
     transform: translateX(-50%);
     background: var(--text);
@@ -203,6 +365,7 @@
     transition: opacity 0.25s;
     max-width: 90%;
     text-align: center;
+    z-index: 50;
   }
   #toast.show { opacity: 1; }
 </style>
@@ -210,7 +373,7 @@
 <body>
 
 <header>
-  <h1>To Do</h1>
+  <h1 id="pageTitle">Current</h1>
   <span id="dateLabel"></span>
 </header>
 
@@ -219,32 +382,97 @@
   <button id="bannerBackupBtn">Back up</button>
 </div>
 
-<div id="addRow">
-  <input id="newItem" type="text" placeholder="Add a task…" autocomplete="off" enterkeyhint="done">
-  <button id="addBtn" aria-label="Add task">+</button>
+<!-- ================= CURRENT PAGE ================= -->
+<div id="page-current" class="page">
+  <div id="currentCard">
+    <div class="topRow">
+      <span class="prio" id="currentPrio"></span>
+      <div class="tagList" id="currentTags"></div>
+    </div>
+    <button class="name" id="currentName" style="background:none;border:none;color:var(--text);text-align:left;"></button>
+    <div id="currentDetails"></div>
+    <div id="currentBtns">
+      <button id="curDone">✓ Done</button>
+      <button id="cur1h">1 Hour</button>
+      <button id="cur1d">1 Day</button>
+      <button id="cur1w">1 Week</button>
+      <button id="curReduce">Reduce Priority</button>
+    </div>
+  </div>
+  <div id="currentEmpty" hidden></div>
 </div>
 
-<ul id="activeList"></ul>
-<p id="emptyMsg" hidden>Nothing to do — add your first task above.</p>
-<button id="doneHeader">Completed (<span id="doneCount">0</span>) — tap to show/hide</button>
-<ul id="doneList" class="collapsed"></ul>
+<!-- ================= TASKS PAGE ================= -->
+<div id="page-tasks" class="page">
+  <div id="addBox">
+    <div id="addRow">
+      <input id="newItem" type="text" placeholder="Add a task…" autocomplete="off" enterkeyhint="done">
+      <button id="addBtn" aria-label="Add task">+</button>
+    </div>
+    <div class="optLabel">Priority (10 = highest)</div>
+    <div class="seg" id="addPrio"></div>
+    <div class="optLabel">Tags</div>
+    <div class="chipRow" id="addTags"></div>
+  </div>
 
-<button id="toolsToggle">Backup &amp; restore</button>
-<div id="tools">
-  <h2>Back up</h2>
-  <p class="hint" id="backupStatus"></p>
-  <div class="btnRow">
-    <button class="action" id="emailBackupBtn">Email backup</button>
-    <button class="action" id="downloadBackupBtn">Save as file</button>
+  <div class="chipRow" id="filterRow"></div>
+
+  <ul id="activeList"></ul>
+  <p id="emptyMsg" hidden></p>
+  <button id="doneHeader">Completed (<span id="doneCount">0</span>) — tap to show/hide</button>
+  <ul id="doneList" class="collapsed"></ul>
+  <button id="clearDoneBtn">Clear completed</button>
+
+  <button id="toolsToggle">Backup &amp; restore</button>
+  <div id="tools">
+    <h2>Back up</h2>
+    <p class="hint" id="backupStatus"></p>
+    <div class="btnRow">
+      <button class="action" id="emailBackupBtn">Email backup</button>
+      <button class="action" id="downloadBackupBtn">Save as file</button>
+    </div>
+    <h2>Restore</h2>
+    <p class="hint">Paste the backup text from your email (or choose a backup file), then tap Restore. This replaces the current list.</p>
+    <textarea id="restoreText" placeholder='Paste backup here, e.g. {"app":"todo", ...}'></textarea>
+    <div class="btnRow">
+      <button class="action" id="restoreBtn">Restore from pasted text</button>
+      <button class="action" id="restoreFileBtn">Choose backup file…</button>
+      <input id="restoreFile" type="file" accept=".json,.txt,application/json,text/plain" hidden>
+    </div>
   </div>
-  <h2>Restore</h2>
-  <p class="hint">Paste the backup text from your email (or choose a backup file), then tap Restore. This replaces the current list.</p>
-  <textarea id="restoreText" placeholder='Paste backup here, e.g. {"app":"todo", ...}'></textarea>
-  <div class="btnRow">
-    <button class="action" id="restoreBtn">Restore from pasted text</button>
-    <button class="action" id="restoreFileBtn">Choose backup file…</button>
-    <input id="restoreFile" type="file" accept=".json,.txt,application/json,text/plain" hidden>
+</div>
+
+<!-- ================= DETAIL SHEET ================= -->
+<div id="overlay">
+  <div id="detailSheet">
+    <div class="sheetHead">
+      <h2>Task details</h2>
+      <button id="closeSheet" aria-label="Close">✕</button>
+    </div>
+    <label class="fieldLabel" for="dName">Name</label>
+    <input id="dName" type="text" autocomplete="off">
+    <label class="fieldLabel">Priority (10 = highest)</label>
+    <div class="seg" id="dPrio"></div>
+    <label class="fieldLabel">Tags</label>
+    <div class="chipRow" id="dTags"></div>
+    <label class="fieldLabel" for="dDetails">Details</label>
+    <textarea id="dDetails" placeholder="Notes, links, anything…"></textarea>
+    <div id="dSnoozeRow">
+      <span id="dSnoozeMsg"></span>
+      <button class="action" id="dUnsnooze">Un-snooze</button>
+    </div>
+    <div id="dMeta"></div>
+    <div id="sheetBtns">
+      <button id="dSave">Save</button>
+      <button id="dDelete">Delete</button>
+    </div>
   </div>
+</div>
+
+<!-- ================= TAB BAR ================= -->
+<div id="tabbar">
+  <button id="tabCurrent"><span class="ico">◎</span>Current</button>
+  <button id="tabTasks"><span class="ico">☰</span>Tasks</button>
 </div>
 
 <div id="toast"></div>
@@ -254,15 +482,41 @@
 
 const STORE_KEY = "todo.v1";
 const BACKUP_REMIND_MS = 48 * 60 * 60 * 1000; // remind after 2 days of unbacked-up changes
+const TAGS = ["Admin", "Reading", "Watching"];
+const HOUR = 3600 * 1000, DAY = 24 * HOUR, WEEK = 7 * DAY;
 
 let state = load();
+let activeTab = "current";
+let filterTag = null;        // null = all
+let addPriority = 5;
+let addTagSel = new Set();
+let editingId = null;
+let editPriority = 5;
+let editTagSel = new Set();
+
+function normalizeItem(i) {
+  return {
+    id: typeof i.id === "string" ? i.id : uid(),
+    name: typeof i.name === "string" ? i.name : (typeof i.text === "string" ? i.text : ""),
+    details: typeof i.details === "string" ? i.details : "",
+    priority: Number.isInteger(i.priority) && i.priority >= 1 && i.priority <= 10 ? i.priority : 5,
+    tags: Array.isArray(i.tags) ? i.tags.filter(t => typeof t === "string") : [],
+    done: !!i.done,
+    createdAt: i.createdAt || Date.now(),
+    completedAt: i.completedAt || null,
+    snoozeUntil: typeof i.snoozeUntil === "number" ? i.snoozeUntil : null,
+  };
+}
 
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
     if (raw) {
       const s = JSON.parse(raw);
-      if (Array.isArray(s.items)) return s;
+      if (Array.isArray(s.items)) {
+        s.items = s.items.map(normalizeItem);
+        return s;
+      }
     }
   } catch (e) { /* fall through to fresh state */ }
   return { items: [], lastBackupAt: null, dirtySince: null };
@@ -281,32 +535,203 @@ function uid() {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
 }
 
-// ---------- rendering ----------
+function isSnoozed(item) {
+  return item.snoozeUntil && item.snoozeUntil > Date.now();
+}
+
+function byId(id) {
+  return state.items.find(i => i.id === id);
+}
+
+// ---------- shared widgets ----------
+
+function prioClass(p) {
+  if (p >= 9) return "pTop";
+  if (p >= 7) return "pHigh";
+  if (p >= 4) return "pMid";
+  return "pLow";
+}
+
+function buildPrioPicker(container, getSel, setSel) {
+  container.innerHTML = "";
+  for (let p = 1; p <= 10; p++) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = p;
+    b.classList.toggle("on", getSel() === p);
+    b.onclick = () => { setSel(p); buildPrioPicker(container, getSel, setSel); };
+    container.appendChild(b);
+  }
+}
+
+function buildTagChips(container, selSet, onChange) {
+  container.innerHTML = "";
+  for (const tag of TAGS) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (selSet.has(tag) ? " on" : "");
+    b.textContent = tag;
+    b.onclick = () => {
+      if (selSet.has(tag)) selSet.delete(tag); else selSet.add(tag);
+      buildTagChips(container, selSet, onChange);
+      if (onChange) onChange();
+    };
+    container.appendChild(b);
+  }
+}
+
+function tagListEl(tags) {
+  const wrap = document.createElement("div");
+  wrap.className = "tagList";
+  for (const t of tags) {
+    const s = document.createElement("span");
+    s.textContent = t;
+    wrap.appendChild(s);
+  }
+  return wrap;
+}
+
+function fmtWhen(ts) {
+  const d = new Date(ts);
+  const sameDay = new Date().toDateString() === d.toDateString();
+  return sameDay
+    ? d.toLocaleTimeString(undefined, { hour: "numeric", minute: "2-digit" })
+    : d.toLocaleString(undefined, { weekday: "short", day: "numeric", month: "short", hour: "numeric", minute: "2-digit" });
+}
+
+// ---------- current page ----------
+
+function pickCurrent() {
+  const eligible = state.items.filter(i => !i.done && !isSnoozed(i));
+  eligible.sort((a, b) => (b.priority - a.priority) || (a.createdAt - b.createdAt));
+  return eligible[0] || null;
+}
+
+function renderCurrent() {
+  const card = document.getElementById("currentCard");
+  const empty = document.getElementById("currentEmpty");
+  const item = pickCurrent();
+
+  if (!item) {
+    card.style.display = "none";
+    empty.hidden = false;
+    const snoozed = state.items.filter(i => !i.done && isSnoozed(i));
+    if (snoozed.length > 0) {
+      const next = Math.min(...snoozed.map(i => i.snoozeUntil));
+      empty.textContent = "All clear for now 🎉 " + snoozed.length + " snoozed task" +
+        (snoozed.length > 1 ? "s" : "") + " — next back at " + fmtWhen(next) + ".";
+    } else if (state.items.some(i => !i.done)) {
+      empty.textContent = "Nothing to show.";
+    } else {
+      empty.textContent = "Nothing to do 🎉 Add tasks on the Tasks page.";
+    }
+    return;
+  }
+
+  card.style.display = "block";
+  empty.hidden = true;
+  const prio = document.getElementById("currentPrio");
+  prio.className = "prio " + prioClass(item.priority);
+  prio.textContent = "P" + item.priority;
+  const tags = document.getElementById("currentTags");
+  tags.innerHTML = "";
+  tags.append(...tagListEl(item.tags).children);
+  const nameBtn = document.getElementById("currentName");
+  nameBtn.textContent = item.name;
+  nameBtn.onclick = () => openDetail(item.id);
+  const det = document.getElementById("currentDetails");
+  det.textContent = item.details;
+  det.style.display = item.details ? "block" : "none";
+
+  document.getElementById("curDone").onclick = () => { completeItem(item.id); };
+  document.getElementById("cur1h").onclick = () => snooze(item.id, HOUR, "1 hour");
+  document.getElementById("cur1d").onclick = () => snooze(item.id, DAY, "1 day");
+  document.getElementById("cur1w").onclick = () => snooze(item.id, WEEK, "1 week");
+  document.getElementById("curReduce").onclick = () => reducePriority(item.id);
+}
+
+function completeItem(id) {
+  const item = byId(id);
+  if (!item) return;
+  item.done = true;
+  item.completedAt = Date.now();
+  markDirty();
+  render();
+  toast("Done: " + item.name);
+}
+
+function snooze(id, ms, label) {
+  const item = byId(id);
+  if (!item) return;
+  item.snoozeUntil = Date.now() + ms;
+  markDirty();
+  render();
+  toast("Snoozed for " + label + " — back at " + fmtWhen(item.snoozeUntil));
+}
+
+function reducePriority(id) {
+  const item = byId(id);
+  if (!item) return;
+  if (item.priority <= 1) {
+    toast("Already at lowest priority (1).");
+    return;
+  }
+  item.priority -= 1;
+  markDirty();
+  render();
+  toast("Priority lowered to P" + item.priority);
+}
+
+// ---------- tasks page ----------
 
 const activeList = document.getElementById("activeList");
 const doneList = document.getElementById("doneList");
-const emptyMsg = document.getElementById("emptyMsg");
-const doneHeader = document.getElementById("doneHeader");
-const doneCount = document.getElementById("doneCount");
 
-function render() {
+function renderTasks() {
+  buildTagChipsFilter();
   activeList.innerHTML = "";
   doneList.innerHTML = "";
-  const active = state.items.filter(i => !i.done);
-  const done = state.items.filter(i => i.done);
+
+  const matches = i => !filterTag || i.tags.includes(filterTag);
+  const active = state.items.filter(i => !i.done && matches(i));
+  const done = state.items.filter(i => i.done && matches(i));
+  active.sort((a, b) => (b.priority - a.priority) || (a.createdAt - b.createdAt));
+  done.sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
 
   for (const item of active) activeList.appendChild(renderItem(item));
   for (const item of done) doneList.appendChild(renderItem(item));
 
+  const emptyMsg = document.getElementById("emptyMsg");
   emptyMsg.hidden = active.length > 0;
-  doneCount.textContent = done.length;
-  doneHeader.classList.toggle("show", done.length > 0);
-  renderBackupInfo();
+  emptyMsg.textContent = filterTag
+    ? "No active “" + filterTag + "” tasks."
+    : "Nothing to do — add your first task above.";
+  document.getElementById("doneCount").textContent = done.length;
+  document.getElementById("doneHeader").classList.toggle("show", done.length > 0);
+  document.getElementById("clearDoneBtn").classList.toggle("show",
+    done.length > 0 && !doneList.classList.contains("collapsed"));
+}
+
+function buildTagChipsFilter() {
+  const row = document.getElementById("filterRow");
+  row.innerHTML = "";
+  const all = document.createElement("button");
+  all.className = "chip" + (filterTag === null ? " on" : "");
+  all.textContent = "All";
+  all.onclick = () => { filterTag = null; renderTasks(); };
+  row.appendChild(all);
+  for (const tag of TAGS) {
+    const b = document.createElement("button");
+    b.className = "chip" + (filterTag === tag ? " on" : "");
+    b.textContent = tag;
+    b.onclick = () => { filterTag = (filterTag === tag ? null : tag); renderTasks(); };
+    row.appendChild(b);
+  }
 }
 
 function renderItem(item) {
   const li = document.createElement("li");
-  li.className = "item" + (item.done ? " done" : "");
+  li.className = "item" + (item.done ? " done" : "") + (isSnoozed(item) ? " snoozed" : "");
 
   const check = document.createElement("button");
   check.className = "check";
@@ -314,45 +739,37 @@ function renderItem(item) {
   check.textContent = "✓";
   check.onclick = () => toggle(item.id);
 
-  const label = document.createElement("span");
-  label.className = "label";
-  label.textContent = item.text;
+  const mid = document.createElement("div");
+  mid.className = "mid";
+  const name = document.createElement("button");
+  name.className = "name";
+  name.textContent = item.name;
+  name.onclick = () => openDetail(item.id);
+  mid.appendChild(name);
+  if (item.tags.length > 0) mid.appendChild(tagListEl(item.tags));
+  if (!item.done && isSnoozed(item)) {
+    const sn = document.createElement("span");
+    sn.className = "snoozeNote";
+    sn.textContent = "⏸ snoozed until " + fmtWhen(item.snoozeUntil);
+    mid.appendChild(sn);
+  }
 
-  const del = document.createElement("button");
-  del.className = "del";
-  del.setAttribute("aria-label", "Delete task");
-  del.textContent = "✕";
-  del.onclick = () => remove(item.id);
+  const prio = document.createElement("span");
+  prio.className = "prio " + prioClass(item.priority);
+  prio.textContent = "P" + item.priority;
 
-  li.append(check, label, del);
+  li.append(check, mid, prio);
   return li;
 }
 
-function renderBackupInfo() {
-  const status = document.getElementById("backupStatus");
-  if (state.lastBackupAt) {
-    status.textContent = "Last backup: " + new Date(state.lastBackupAt).toLocaleString();
-  } else {
-    status.textContent = "Never backed up yet.";
-  }
-
-  const banner = document.getElementById("backupBanner");
-  const overdue = state.dirtySince && (Date.now() - state.dirtySince > BACKUP_REMIND_MS) && state.items.length > 0;
-  if (overdue) {
-    const days = Math.floor((Date.now() - state.dirtySince) / (24 * 60 * 60 * 1000));
-    document.getElementById("backupBannerMsg").textContent =
-      "You have changes from " + (days <= 1 ? "over a day" : days + " days") + " ago that aren't backed up.";
-  }
-  banner.classList.toggle("show", !!overdue);
-}
-
-// ---------- actions ----------
-
 function addItem() {
   const input = document.getElementById("newItem");
-  const text = input.value.trim();
-  if (!text) return;
-  state.items.unshift({ id: uid(), text, done: false, createdAt: Date.now(), completedAt: null });
+  const name = input.value.trim();
+  if (!name) return;
+  state.items.push({
+    id: uid(), name, details: "", priority: addPriority, tags: [...addTagSel],
+    done: false, createdAt: Date.now(), completedAt: null, snoozeUntil: null,
+  });
   input.value = "";
   markDirty();
   render();
@@ -360,7 +777,7 @@ function addItem() {
 }
 
 function toggle(id) {
-  const item = state.items.find(i => i.id === id);
+  const item = byId(id);
   if (!item) return;
   item.done = !item.done;
   item.completedAt = item.done ? Date.now() : null;
@@ -368,16 +785,70 @@ function toggle(id) {
   render();
 }
 
-function remove(id) {
-  state.items = state.items.filter(i => i.id !== id);
+// ---------- detail sheet ----------
+
+function openDetail(id) {
+  const item = byId(id);
+  if (!item) return;
+  editingId = id;
+  editPriority = item.priority;
+  editTagSel = new Set(item.tags);
+
+  document.getElementById("dName").value = item.name;
+  document.getElementById("dDetails").value = item.details;
+  buildPrioPicker(document.getElementById("dPrio"), () => editPriority, p => { editPriority = p; });
+  buildTagChips(document.getElementById("dTags"), editTagSel);
+
+  const snRow = document.getElementById("dSnoozeRow");
+  if (!item.done && isSnoozed(item)) {
+    document.getElementById("dSnoozeMsg").textContent = "Snoozed until " + fmtWhen(item.snoozeUntil);
+    snRow.classList.add("show");
+  } else {
+    snRow.classList.remove("show");
+  }
+
+  let meta = "Created " + new Date(item.createdAt).toLocaleDateString();
+  if (item.done && item.completedAt) meta += " · Completed " + new Date(item.completedAt).toLocaleDateString();
+  document.getElementById("dMeta").textContent = meta;
+
+  document.getElementById("overlay").classList.add("show");
+}
+
+function closeDetail() {
+  editingId = null;
+  document.getElementById("overlay").classList.remove("show");
+}
+
+function saveDetail() {
+  const item = byId(editingId);
+  if (!item) { closeDetail(); return; }
+  const name = document.getElementById("dName").value.trim();
+  if (!name) { toast("Name can't be empty."); return; }
+  item.name = name;
+  item.details = document.getElementById("dDetails").value.trim();
+  item.priority = editPriority;
+  item.tags = [...editTagSel];
   markDirty();
+  closeDetail();
   render();
+  toast("Saved.");
+}
+
+function deleteDetail() {
+  const item = byId(editingId);
+  if (!item) { closeDetail(); return; }
+  if (!confirm("Delete “" + item.name + "”?")) return;
+  state.items = state.items.filter(i => i.id !== editingId);
+  markDirty();
+  closeDetail();
+  render();
+  toast("Deleted.");
 }
 
 // ---------- backup / restore ----------
 
 function backupPayload() {
-  return JSON.stringify({ app: "todo", version: 1, exportedAt: new Date().toISOString(), items: state.items });
+  return JSON.stringify({ app: "todo", version: 2, exportedAt: new Date().toISOString(), items: state.items });
 }
 
 function backupDone() {
@@ -433,23 +904,54 @@ function restoreFromText(text) {
     return;
   }
   const items = Array.isArray(parsed) ? parsed : parsed.items;
-  if (!Array.isArray(items) || !items.every(i => i && typeof i.text === "string")) {
+  if (!Array.isArray(items) || !items.every(i => i && (typeof i.name === "string" || typeof i.text === "string"))) {
     toast("That doesn't look like a valid backup.");
     return;
   }
   const ok = confirm("Replace your current list (" + state.items.length + " items) with the backup (" + items.length + " items)?");
   if (!ok) return;
-  state.items = items.map(i => ({
-    id: typeof i.id === "string" ? i.id : uid(),
-    text: i.text,
-    done: !!i.done,
-    createdAt: i.createdAt || Date.now(),
-    completedAt: i.completedAt || null,
-  }));
+  state.items = items.map(normalizeItem);
   markDirty();
   render();
   document.getElementById("restoreText").value = "";
   toast("Restored " + items.length + " items.");
+}
+
+// ---------- backup reminder ----------
+
+function renderBackupInfo() {
+  const status = document.getElementById("backupStatus");
+  if (state.lastBackupAt) {
+    status.textContent = "Last backup: " + new Date(state.lastBackupAt).toLocaleString();
+  } else {
+    status.textContent = "Never backed up yet.";
+  }
+
+  const banner = document.getElementById("backupBanner");
+  const overdue = state.dirtySince && (Date.now() - state.dirtySince > BACKUP_REMIND_MS) && state.items.length > 0;
+  if (overdue) {
+    const days = Math.floor((Date.now() - state.dirtySince) / DAY);
+    document.getElementById("backupBannerMsg").textContent =
+      "You have changes from " + (days <= 1 ? "over a day" : days + " days") + " ago that aren't backed up.";
+  }
+  banner.classList.toggle("show", !!overdue);
+}
+
+// ---------- tabs / render ----------
+
+function setTab(tab) {
+  activeTab = tab;
+  document.getElementById("page-current").classList.toggle("show", tab === "current");
+  document.getElementById("page-tasks").classList.toggle("show", tab === "tasks");
+  document.getElementById("tabCurrent").classList.toggle("on", tab === "current");
+  document.getElementById("tabTasks").classList.toggle("on", tab === "tasks");
+  document.getElementById("pageTitle").textContent = tab === "current" ? "Current" : "Tasks";
+  render();
+}
+
+function render() {
+  if (activeTab === "current") renderCurrent(); else renderTasks();
+  renderBackupInfo();
 }
 
 // ---------- misc ----------
@@ -467,7 +969,18 @@ function toast(msg) {
 
 document.getElementById("addBtn").onclick = addItem;
 document.getElementById("newItem").addEventListener("keydown", e => { if (e.key === "Enter") addItem(); });
-document.getElementById("doneHeader").onclick = () => doneList.classList.toggle("collapsed");
+buildPrioPicker(document.getElementById("addPrio"), () => addPriority, p => { addPriority = p; });
+buildTagChips(document.getElementById("addTags"), addTagSel);
+
+document.getElementById("doneHeader").onclick = () => { doneList.classList.toggle("collapsed"); renderTasks(); };
+document.getElementById("clearDoneBtn").onclick = () => {
+  const done = state.items.filter(i => i.done);
+  if (done.length === 0) return;
+  if (!confirm("Delete all " + done.length + " completed tasks?")) return;
+  state.items = state.items.filter(i => !i.done);
+  markDirty();
+  render();
+};
 document.getElementById("toolsToggle").onclick = () => document.getElementById("tools").classList.toggle("show");
 document.getElementById("emailBackupBtn").onclick = emailBackup;
 document.getElementById("bannerBackupBtn").onclick = emailBackup;
@@ -483,10 +996,30 @@ document.getElementById("restoreFile").addEventListener("change", e => {
   e.target.value = "";
 });
 
+document.getElementById("tabCurrent").onclick = () => setTab("current");
+document.getElementById("tabTasks").onclick = () => setTab("tasks");
+document.getElementById("closeSheet").onclick = closeDetail;
+document.getElementById("overlay").addEventListener("click", e => { if (e.target === e.currentTarget) closeDetail(); });
+document.getElementById("dSave").onclick = saveDetail;
+document.getElementById("dDelete").onclick = deleteDetail;
+document.getElementById("dUnsnooze").onclick = () => {
+  const item = byId(editingId);
+  if (!item) return;
+  item.snoozeUntil = null;
+  markDirty();
+  document.getElementById("dSnoozeRow").classList.remove("show");
+  render();
+  toast("Snooze removed.");
+};
+
 document.getElementById("dateLabel").textContent =
   new Date().toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 
-render();
+// Re-check snoozes when the app comes back to the foreground, and once a minute.
+document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
+setInterval(render, 60 * 1000);
+
+setTab("current");
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");
