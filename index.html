@@ -435,10 +435,11 @@
       <button class="action" id="downloadBackupBtn">Save as file</button>
     </div>
     <h2>Restore</h2>
-    <p class="hint">Paste the backup text from your email (or choose a backup file), then tap Restore. This replaces the current list.</p>
+    <p class="hint">Paste backup text (or choose a backup file). "Restore" replaces the whole list; "Import &amp; add" adds the pasted items to what's already there.</p>
     <textarea id="restoreText" placeholder='Paste backup here, e.g. {"app":"todo", ...}'></textarea>
     <div class="btnRow">
-      <button class="action" id="restoreBtn">Restore from pasted text</button>
+      <button class="action" id="restoreBtn">Restore (replace)</button>
+      <button class="action" id="importBtn">Import &amp; add</button>
       <button class="action" id="restoreFileBtn">Choose backup file…</button>
       <input id="restoreFile" type="file" accept=".json,.txt,application/json,text/plain" hidden>
     </div>
@@ -464,10 +465,19 @@
     <label class="fieldLabel">Tags</label>
     <div class="chipRow" id="addTags"></div>
     <div id="addBdayWrap" style="display:none">
-      <label class="fieldLabel">Birthday (day &amp; month) — priority is automatic: 1 far out, rising to 10 near the day</label>
-      <div class="dateHintRow">
+      <label class="fieldLabel">Event date — priority is automatic: 1 far out, rising to 10 near the day</label>
+      <div class="chipRow" style="margin-bottom:8px">
+        <button type="button" class="chip" id="addBdayModeFixed">Fixed date</button>
+        <button type="button" class="chip" id="addBdayModeRule">Nth weekday</button>
+      </div>
+      <div class="dateHintRow" id="addBdayFixedRow">
         <select id="addBdayDay" class="dateInput"></select>
         <select id="addBdayMon" class="dateInput"></select>
+      </div>
+      <div class="dateHintRow" id="addBdayRuleRow" style="display:none">
+        <select id="addBdayNth" class="dateInput"></select>
+        <select id="addBdayWk" class="dateInput"></select>
+        <select id="addBdayRMon" class="dateInput"></select>
       </div>
     </div>
     <button id="addSubmit">Add Task</button>
@@ -495,10 +505,19 @@
     <label class="fieldLabel">Tags</label>
     <div class="chipRow" id="dTags"></div>
     <div id="dBdayWrap" style="display:none">
-      <label class="fieldLabel">Birthday (day &amp; month) — priority is automatic: 1 far out, rising to 10 near the day</label>
-      <div class="dateHintRow">
+      <label class="fieldLabel">Event date — priority is automatic: 1 far out, rising to 10 near the day</label>
+      <div class="chipRow" style="margin-bottom:8px">
+        <button type="button" class="chip" id="dBdayModeFixed">Fixed date</button>
+        <button type="button" class="chip" id="dBdayModeRule">Nth weekday</button>
+      </div>
+      <div class="dateHintRow" id="dBdayFixedRow">
         <select id="dBdayDay" class="dateInput"></select>
         <select id="dBdayMon" class="dateInput"></select>
+      </div>
+      <div class="dateHintRow" id="dBdayRuleRow" style="display:none">
+        <select id="dBdayNth" class="dateInput"></select>
+        <select id="dBdayWk" class="dateInput"></select>
+        <select id="dBdayRMon" class="dateInput"></select>
       </div>
     </div>
     <label class="fieldLabel" for="dDetails">Details</label>
@@ -555,7 +574,7 @@ function normalizeItem(i) {
     details: typeof i.details === "string" ? i.details : "",
     priority: Number.isInteger(i.priority) && i.priority >= 1 && i.priority <= 10 ? i.priority : 5,
     p10Date: (typeof i.p10Date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(i.p10Date)) ? i.p10Date : null,
-    bdayDate: (typeof i.bdayDate === "string" && /^\d{2}-\d{2}$/.test(i.bdayDate)) ? i.bdayDate : null,
+    bdayDate: (typeof i.bdayDate === "string" && (/^\d{2}-\d{2}$/.test(i.bdayDate) || /^R\d{2}-[1-5]-[0-6]$/.test(i.bdayDate))) ? i.bdayDate : null,
     tags: Array.isArray(i.tags) ? i.tags.filter(t => typeof t === "string").map(t => TAG_RENAMES[t] || t) : [],
     done: !!i.done,
     createdAt: i.createdAt || Date.now(),
@@ -603,13 +622,33 @@ function isBday(item) {
   return item.tags.includes("Bday") && !!item.bdayDate;
 }
 
-// Next occurrence (local midnight) of an "MM-DD" date of the year.
-function nextBday(mmdd) {
-  const [m, d] = mmdd.split("-").map(Number);
+// Nth <weekday> of a month; n = 5 means "last".
+function nthWeekday(year, month, n, weekday) {
+  if (n === 5) {
+    const last = new Date(year, month, 0);
+    const diff = (last.getDay() - weekday + 7) % 7;
+    return new Date(year, month - 1, last.getDate() - diff);
+  }
+  const first = new Date(year, month - 1, 1);
+  const offset = (weekday - first.getDay() + 7) % 7;
+  return new Date(year, month - 1, 1 + offset + (n - 1) * 7);
+}
+
+// Next occurrence (local midnight) of an event spec:
+// "MM-DD" = fixed date of the year; "RMM-N-W" = Nth weekday W of month MM (W: 0=Sun..6=Sat, N: 5=last).
+function nextBday(spec) {
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-  let cand = new Date(today.getFullYear(), m - 1, d);
-  if (cand < today) cand = new Date(today.getFullYear() + 1, m - 1, d);
+  const occ = y => {
+    if (spec.charAt(0) === "R") {
+      const [m, n, w] = spec.slice(1).split("-").map(Number);
+      return nthWeekday(y, m, n, w);
+    }
+    const [m, d] = spec.split("-").map(Number);
+    return new Date(y, m - 1, d);
+  };
+  let cand = occ(today.getFullYear());
+  if (cand < today) cand = occ(today.getFullYear() + 1);
   return cand;
 }
 
@@ -686,30 +725,55 @@ function buildTagChips(container, selSet, onChange) {
   }
 }
 
-function initBdaySelects(dayId, monId) {
-  const dayEl = document.getElementById(dayId), monEl = document.getElementById(monId);
-  for (let d = 1; d <= 31; d++) {
+const bdayModes = { add: "fixed", d: "fixed" };
+
+function fillSelect(id, options) {
+  const el = document.getElementById(id);
+  for (const [value, label] of options) {
     const o = document.createElement("option");
-    o.value = String(d).padStart(2, "0");
-    o.textContent = d;
-    dayEl.appendChild(o);
+    o.value = value;
+    o.textContent = label;
+    el.appendChild(o);
   }
-  MONTH_NAMES.forEach((m, idx) => {
-    const o = document.createElement("option");
-    o.value = String(idx + 1).padStart(2, "0");
-    o.textContent = m;
-    monEl.appendChild(o);
-  });
 }
 
-function getBdaySel(dayId, monId) {
-  return document.getElementById(monId).value + "-" + document.getElementById(dayId).value;
+function initBdayControls(prefix) {
+  fillSelect(prefix + "BdayDay", Array.from({ length: 31 }, (_, i) => [String(i + 1).padStart(2, "0"), i + 1]));
+  const monthOpts = MONTH_NAMES.map((m, i) => [String(i + 1).padStart(2, "0"), m]);
+  fillSelect(prefix + "BdayMon", monthOpts);
+  fillSelect(prefix + "BdayNth", [["1", "1st"], ["2", "2nd"], ["3", "3rd"], ["4", "4th"], ["5", "Last"]]);
+  fillSelect(prefix + "BdayWk", ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((w, i) => [String(i), w]));
+  fillSelect(prefix + "BdayRMon", monthOpts);
+  document.getElementById(prefix + "BdayModeFixed").onclick = () => setBdayMode(prefix, "fixed");
+  document.getElementById(prefix + "BdayModeRule").onclick = () => setBdayMode(prefix, "rule");
+  setBdayMode(prefix, "fixed");
 }
 
-function setBdaySel(dayId, monId, mmdd) {
-  const [m, d] = (mmdd || "01-01").split("-");
-  document.getElementById(monId).value = m;
-  document.getElementById(dayId).value = d;
+function setBdayMode(prefix, mode) {
+  bdayModes[prefix] = mode;
+  document.getElementById(prefix + "BdayModeFixed").classList.toggle("on", mode === "fixed");
+  document.getElementById(prefix + "BdayModeRule").classList.toggle("on", mode === "rule");
+  document.getElementById(prefix + "BdayFixedRow").style.display = mode === "fixed" ? "" : "none";
+  document.getElementById(prefix + "BdayRuleRow").style.display = mode === "rule" ? "" : "none";
+}
+
+function getBdaySpec(prefix) {
+  const v = id => document.getElementById(prefix + id).value;
+  if (bdayModes[prefix] === "rule") return "R" + v("BdayRMon") + "-" + v("BdayNth") + "-" + v("BdayWk");
+  return v("BdayMon") + "-" + v("BdayDay");
+}
+
+function setBdaySpec(prefix, spec) {
+  const set = (id, val) => { document.getElementById(prefix + id).value = val; };
+  if (spec && spec.charAt(0) === "R") {
+    const [m, n, w] = spec.slice(1).split("-");
+    set("BdayRMon", m); set("BdayNth", n); set("BdayWk", w);
+    setBdayMode(prefix, "rule");
+  } else {
+    const [m, d] = (spec || "01-01").split("-");
+    set("BdayMon", m); set("BdayDay", d);
+    setBdayMode(prefix, "fixed");
+  }
 }
 
 function updateAddFormMode() {
@@ -1007,7 +1071,7 @@ function addItem() {
     details: document.getElementById("newDetails").value.trim(),
     priority: addPriority,
     p10Date: isB ? null : (document.getElementById("newP10").value || null),
-    bdayDate: isB ? getBdaySel("addBdayDay", "addBdayMon") : null,
+    bdayDate: isB ? getBdaySpec("add") : null,
     tags: [...addTagSel],
     done: false, createdAt: Date.now(), completedAt: null, snoozeUntil: null,
   });
@@ -1037,7 +1101,7 @@ function openDetail(id) {
   document.getElementById("dName").value = item.name;
   document.getElementById("dDetails").value = item.details;
   document.getElementById("dP10").value = item.p10Date || "";
-  setBdaySel("dBdayDay", "dBdayMon", item.bdayDate);
+  setBdaySpec("d", item.bdayDate);
   buildPrioPicker(document.getElementById("dPrio"), () => editPriority, p => { editPriority = p; });
   buildTagChips(document.getElementById("dTags"), editTagSel, updateSheetMode);
   updateSheetMode();
@@ -1078,7 +1142,7 @@ function saveDetail() {
   item.details = document.getElementById("dDetails").value.trim();
   item.priority = editPriority;
   item.p10Date = isB ? null : (document.getElementById("dP10").value || null);
-  item.bdayDate = isB ? getBdaySel("dBdayDay", "dBdayMon") : null;
+  item.bdayDate = isB ? getBdaySpec("d") : null;
   item.tags = [...editTagSel];
   markDirty();
   closeDetail();
@@ -1145,7 +1209,7 @@ function downloadBackup() {
   toast("Backup file saved.");
 }
 
-function restoreFromText(text) {
+function restoreFromText(text, merge) {
   let parsed;
   // Accept either raw JSON or an email body with the JSON between ----- lines.
   const fenced = text.match(/-----\s*([\s\S]*?)\s*-----/);
@@ -1161,9 +1225,24 @@ function restoreFromText(text) {
     toast("That doesn't look like a valid backup.");
     return;
   }
+  const incoming = items.map(normalizeItem);
+
+  if (merge) {
+    const existing = new Set(state.items.map(i => i.id));
+    for (const it of incoming) {
+      if (existing.has(it.id)) it.id = uid();
+      state.items.push(it);
+    }
+    markDirty();
+    render();
+    document.getElementById("restoreText").value = "";
+    toast("Imported " + incoming.length + " items into your list.");
+    return;
+  }
+
   const ok = confirm("Replace your current list (" + state.items.length + " items) with the backup (" + items.length + " items)?");
   if (!ok) return;
-  state.items = items.map(normalizeItem);
+  state.items = incoming;
   markDirty();
   render();
   document.getElementById("restoreText").value = "";
@@ -1228,8 +1307,8 @@ function toast(msg) {
 
 document.getElementById("addSubmit").onclick = addItem;
 buildPrioPicker(document.getElementById("addPrio"), () => addPriority, p => { addPriority = p; });
-initBdaySelects("addBdayDay", "addBdayMon");
-initBdaySelects("dBdayDay", "dBdayMon");
+initBdayControls("add");
+initBdayControls("d");
 buildTagChips(document.getElementById("addTags"), addTagSel, updateAddFormMode);
 document.getElementById("newP10Clear").onclick = () => { document.getElementById("newP10").value = ""; };
 document.getElementById("dP10Clear").onclick = () => { document.getElementById("dP10").value = ""; };
@@ -1253,7 +1332,8 @@ document.getElementById("toolsToggle").onclick = () => {
 document.getElementById("emailBackupBtn").onclick = emailBackup;
 document.getElementById("bannerBackupBtn").onclick = emailBackup;
 document.getElementById("downloadBackupBtn").onclick = downloadBackup;
-document.getElementById("restoreBtn").onclick = () => restoreFromText(document.getElementById("restoreText").value);
+document.getElementById("restoreBtn").onclick = () => restoreFromText(document.getElementById("restoreText").value, false);
+document.getElementById("importBtn").onclick = () => restoreFromText(document.getElementById("restoreText").value, true);
 document.getElementById("restoreFileBtn").onclick = () => document.getElementById("restoreFile").click();
 document.getElementById("restoreFile").addEventListener("change", e => {
   const f = e.target.files[0];

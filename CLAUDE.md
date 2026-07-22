@@ -34,9 +34,12 @@ home-screen web app installed via Safari's "Add to Home Screen".
   (task auto-escalates to P10 on that date), tag chips.
 - **Detail sheet** (tap any task name): edit everything, un-snooze, Mark Uncomplete
   (for completed tasks), delete.
-- **Bday tasks** (recurring birthdays): selecting the `Bday` tag swaps the priority
-  + P10-date controls for day/month selects (`bdayDate` "MM-DD"). Priority is fully
-  automatic (`bdayPrio`): 1 when >91 days out, linear up to 10 at ≤14 days.
+- **Bday tasks** (recurring birthdays/events): selecting the `Bday` tag swaps the
+  priority + P10-date controls for date pickers. `bdayDate` is either "MM-DD"
+  (fixed date) or "RMM-N-W" (Nth weekday rule: month MM, N 1–4 or 5=last,
+  W 0=Sun..6=Sat — e.g. Mother's Day = 2nd Sunday of May = "R05-2-0").
+  Priority is fully automatic (`bdayPrio`): 1 when >91 days out, linear up to 10
+  at ≤14 days.
   "Done" / the check circle never completes them — `rollBday()` snoozes to the day
   after the date, so they recur yearly. Lists show "🎂 1 Feb · Nd" countdown.
   Priority badges show the bare number (no "P" prefix); tags/snooze/countdown share
@@ -48,13 +51,17 @@ home-screen web app installed via Safari's "Add to Home Screen".
   (Hugh's explicit preference over a pre-filled "To" — the share sheet can't
   pre-fill a recipient, and he chose attachment > pre-fill; his address
   `hughnorton7@gmail.com` is `BACKUP_EMAIL`, used in the mailto fallback and toast).
-  Restore accepts pasted email-body text (between `-----` fences) or a chosen file.
+  Restore accepts pasted email-body text (between `-----` fences) or a chosen file;
+  "Restore (replace)" swaps the whole list, "Import & add" merges pasted items into
+  the existing list (fresh ids on collision). Minimal import JSON works:
+  `{"app":"todo","items":[{"name":"X","tags":["Bday"],"bdayDate":"08-06"}]}` —
+  `normalizeItem` fills the rest.
 
 ## Deploy workflow
 
 1. Edit files locally (this folder is the repo).
 2. **Always bump `CACHE` in `sw.js`** (`todo-vN`) with any change, or phones keep
-   the stale cached version. Currently `todo-v6`.
+   the stale cached version. Currently `todo-v7`.
 3. Smoke check: `python -m http.server 8642 --directory .` then fetch
    `index.html` and grep for the new element IDs (no browser automation available —
    Hugh declined the Chrome extension; he tests on his phone).
