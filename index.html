@@ -133,6 +133,7 @@
     font-weight: 600;
   }
   .subNote { color: var(--muted); font-size: 0.75rem; }
+  .metaRow { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
 
   .seg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
   .seg button {
@@ -451,15 +452,24 @@
     <input id="newItem" class="txtInput" type="text" placeholder="What needs doing?" autocomplete="off">
     <label class="fieldLabel" for="newDetails">Details</label>
     <textarea id="newDetails" class="txtArea" placeholder="Notes, links, anything…"></textarea>
-    <label class="fieldLabel">Priority (10 = highest)</label>
-    <div class="seg" id="addPrio"></div>
-    <label class="fieldLabel" for="newP10">Priority 10 date — optional: task jumps to P10 on this day</label>
-    <div class="dateHintRow">
-      <input id="newP10" class="dateInput" type="date">
-      <button class="clearDateBtn" id="newP10Clear">Clear</button>
+    <div id="addPrioWrap">
+      <label class="fieldLabel">Priority (10 = highest)</label>
+      <div class="seg" id="addPrio"></div>
+      <label class="fieldLabel" for="newP10">Priority 10 date — optional: task jumps to P10 on this day</label>
+      <div class="dateHintRow">
+        <input id="newP10" class="dateInput" type="date">
+        <button class="clearDateBtn" id="newP10Clear">Clear</button>
+      </div>
     </div>
     <label class="fieldLabel">Tags</label>
     <div class="chipRow" id="addTags"></div>
+    <div id="addBdayWrap" style="display:none">
+      <label class="fieldLabel">Birthday (day &amp; month) — priority is automatic: 1 far out, rising to 10 near the day</label>
+      <div class="dateHintRow">
+        <select id="addBdayDay" class="dateInput"></select>
+        <select id="addBdayMon" class="dateInput"></select>
+      </div>
+    </div>
     <button id="addSubmit">Add Task</button>
   </div>
 </div>
@@ -473,15 +483,24 @@
     </div>
     <label class="fieldLabel" for="dName">Name</label>
     <input id="dName" class="txtInput" type="text" autocomplete="off">
-    <label class="fieldLabel">Priority (10 = highest)</label>
-    <div class="seg" id="dPrio"></div>
-    <label class="fieldLabel" for="dP10">Priority 10 date — optional: task jumps to P10 on this day</label>
-    <div class="dateHintRow">
-      <input id="dP10" class="dateInput" type="date">
-      <button class="clearDateBtn" id="dP10Clear">Clear</button>
+    <div id="dPrioWrap">
+      <label class="fieldLabel">Priority (10 = highest)</label>
+      <div class="seg" id="dPrio"></div>
+      <label class="fieldLabel" for="dP10">Priority 10 date — optional: task jumps to P10 on this day</label>
+      <div class="dateHintRow">
+        <input id="dP10" class="dateInput" type="date">
+        <button class="clearDateBtn" id="dP10Clear">Clear</button>
+      </div>
     </div>
     <label class="fieldLabel">Tags</label>
     <div class="chipRow" id="dTags"></div>
+    <div id="dBdayWrap" style="display:none">
+      <label class="fieldLabel">Birthday (day &amp; month) — priority is automatic: 1 far out, rising to 10 near the day</label>
+      <div class="dateHintRow">
+        <select id="dBdayDay" class="dateInput"></select>
+        <select id="dBdayMon" class="dateInput"></select>
+      </div>
+    </div>
     <label class="fieldLabel" for="dDetails">Details</label>
     <textarea id="dDetails" class="txtArea" placeholder="Notes, links, anything…"></textarea>
     <div id="dSnoozeRow">
@@ -515,7 +534,9 @@
 const STORE_KEY = "todo.v1";
 const BACKUP_REMIND_MS = 48 * 60 * 60 * 1000; // remind when the last backup is older than 2 days
 const BACKUP_EMAIL = "hughnorton7@gmail.com";
-const TAGS = ["Admin", "Reading", "Watching"];
+const TAGS = ["Admin", "Read", "Watch", "Bday"];
+const TAG_RENAMES = { Reading: "Read", Watching: "Watch" };
+const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const HOUR = 3600 * 1000, DAY = 24 * HOUR, WEEK = 7 * DAY, MONTH = 30 * DAY;
 
 let state = load();
@@ -534,7 +555,8 @@ function normalizeItem(i) {
     details: typeof i.details === "string" ? i.details : "",
     priority: Number.isInteger(i.priority) && i.priority >= 1 && i.priority <= 10 ? i.priority : 5,
     p10Date: (typeof i.p10Date === "string" && /^\d{4}-\d{2}-\d{2}$/.test(i.p10Date)) ? i.p10Date : null,
-    tags: Array.isArray(i.tags) ? i.tags.filter(t => typeof t === "string") : [],
+    bdayDate: (typeof i.bdayDate === "string" && /^\d{2}-\d{2}$/.test(i.bdayDate)) ? i.bdayDate : null,
+    tags: Array.isArray(i.tags) ? i.tags.filter(t => typeof t === "string").map(t => TAG_RENAMES[t] || t) : [],
     done: !!i.done,
     createdAt: i.createdAt || Date.now(),
     completedAt: i.completedAt || null,
@@ -577,8 +599,43 @@ function p10Reached(item) {
   return item.p10Date && new Date(item.p10Date + "T00:00") <= new Date();
 }
 
-// The priority the task counts as right now (escalates to 10 once its P10 date arrives).
+function isBday(item) {
+  return item.tags.includes("Bday") && !!item.bdayDate;
+}
+
+// Next occurrence (local midnight) of an "MM-DD" date of the year.
+function nextBday(mmdd) {
+  const [m, d] = mmdd.split("-").map(Number);
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  let cand = new Date(today.getFullYear(), m - 1, d);
+  if (cand < today) cand = new Date(today.getFullYear() + 1, m - 1, d);
+  return cand;
+}
+
+function daysUntilBday(mmdd) {
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  return Math.round((nextBday(mmdd) - today) / DAY);
+}
+
+// 1 when >3 months out, 10 from two weeks before, linear in between.
+function bdayPrio(item) {
+  const days = daysUntilBday(item.bdayDate);
+  if (days > 91) return 1;
+  if (days <= 14) return 10;
+  return Math.round(1 + (91 - days) * 9 / (91 - 14));
+}
+
+function fmtBdayStr(mmdd) {
+  const d = nextBday(mmdd);
+  return d.getDate() + " " + MONTH_NAMES[d.getMonth()];
+}
+
+// The priority the task counts as right now: birthdays scale with closeness,
+// otherwise a task escalates to 10 once its P10 date arrives.
 function effPrio(item) {
+  if (isBday(item)) return bdayPrio(item);
   return p10Reached(item) ? 10 : item.priority;
 }
 
@@ -613,7 +670,7 @@ function buildPrioPicker(container, getSel, setSel) {
   }
 }
 
-function buildTagChips(container, selSet) {
+function buildTagChips(container, selSet, onChange) {
   container.innerHTML = "";
   for (const tag of TAGS) {
     const b = document.createElement("button");
@@ -622,10 +679,49 @@ function buildTagChips(container, selSet) {
     b.textContent = tag;
     b.onclick = () => {
       if (selSet.has(tag)) selSet.delete(tag); else selSet.add(tag);
-      buildTagChips(container, selSet);
+      buildTagChips(container, selSet, onChange);
+      if (onChange) onChange();
     };
     container.appendChild(b);
   }
+}
+
+function initBdaySelects(dayId, monId) {
+  const dayEl = document.getElementById(dayId), monEl = document.getElementById(monId);
+  for (let d = 1; d <= 31; d++) {
+    const o = document.createElement("option");
+    o.value = String(d).padStart(2, "0");
+    o.textContent = d;
+    dayEl.appendChild(o);
+  }
+  MONTH_NAMES.forEach((m, idx) => {
+    const o = document.createElement("option");
+    o.value = String(idx + 1).padStart(2, "0");
+    o.textContent = m;
+    monEl.appendChild(o);
+  });
+}
+
+function getBdaySel(dayId, monId) {
+  return document.getElementById(monId).value + "-" + document.getElementById(dayId).value;
+}
+
+function setBdaySel(dayId, monId, mmdd) {
+  const [m, d] = (mmdd || "01-01").split("-");
+  document.getElementById(monId).value = m;
+  document.getElementById(dayId).value = d;
+}
+
+function updateAddFormMode() {
+  const isB = addTagSel.has("Bday");
+  document.getElementById("addPrioWrap").style.display = isB ? "none" : "";
+  document.getElementById("addBdayWrap").style.display = isB ? "" : "none";
+}
+
+function updateSheetMode() {
+  const isB = editTagSel.has("Bday");
+  document.getElementById("dPrioWrap").style.display = isB ? "none" : "";
+  document.getElementById("dBdayWrap").style.display = isB ? "" : "none";
 }
 
 function tagListEl(tags) {
@@ -709,10 +805,18 @@ function renderCurrent() {
   const prio = document.getElementById("currentPrio");
   const p = effPrio(item);
   prio.className = "prio " + prioClass(p);
-  prio.textContent = "P" + p + (p10Reached(item) && item.priority !== 10 ? " ⚡" : "");
+  prio.textContent = p + (!isBday(item) && p10Reached(item) && item.priority !== 10 ? " ⚡" : "");
   const tags = document.getElementById("currentTags");
   tags.innerHTML = "";
   tags.append(...tagListEl(item.tags).children);
+  if (isBday(item)) {
+    const days = daysUntilBday(item.bdayDate);
+    const b = document.createElement("span");
+    b.className = "subNote";
+    b.textContent = "🎂 " + fmtBdayStr(item.bdayDate) + " — " +
+      (days === 0 ? "today!" : days + " day" + (days === 1 ? "" : "s") + " away");
+    tags.appendChild(b);
+  }
   const nameBtn = document.getElementById("currentName");
   nameBtn.textContent = item.name;
   nameBtn.onclick = () => openDetail(item.id);
@@ -728,9 +832,20 @@ function renderCurrent() {
   document.getElementById("curReduce").onclick = () => reducePriority(item.id);
 }
 
+// Birthdays recur: "done" hides the task until the day after this year's date, then the cycle restarts.
+function rollBday(item) {
+  item.snoozeUntil = nextBday(item.bdayDate).getTime() + DAY;
+  item.done = false;
+  item.completedAt = null;
+  markDirty();
+  render();
+  toast(item.name + " — back next year 🎂");
+}
+
 function completeItem(id) {
   const item = byId(id);
   if (!item) return;
+  if (isBday(item)) { rollBday(item); return; }
   item.done = true;
   item.completedAt = Date.now();
   markDirty();
@@ -750,6 +865,10 @@ function snooze(id, ms, label) {
 function reducePriority(id) {
   const item = byId(id);
   if (!item) return;
+  if (isBday(item)) {
+    toast("Birthday priority is automatic — it follows how close the date is.");
+    return;
+  }
   if (p10Reached(item)) {
     // Escalated by its P10 date: drop it to 9 and clear the date, otherwise it would stay pinned at 10.
     item.priority = 9;
@@ -833,24 +952,34 @@ function renderItem(item) {
   name.textContent = item.name;
   name.onclick = () => openDetail(item.id);
   mid.appendChild(name);
-  if (item.tags.length > 0) mid.appendChild(tagListEl(item.tags));
+  const meta = document.createElement("div");
+  meta.className = "metaRow";
+  if (item.tags.length > 0) meta.appendChild(tagListEl(item.tags));
+  if (!item.done && isBday(item)) {
+    const days = daysUntilBday(item.bdayDate);
+    const b = document.createElement("span");
+    b.className = "subNote";
+    b.textContent = "🎂 " + fmtBdayStr(item.bdayDate) + " · " + (days === 0 ? "today!" : days + "d");
+    meta.appendChild(b);
+  }
   if (!item.done && isSnoozed(item)) {
     const sn = document.createElement("span");
     sn.className = "subNote";
-    sn.textContent = "⏸ snoozed until " + fmtWhen(item.snoozeUntil);
-    mid.appendChild(sn);
+    sn.textContent = "⏸ until " + fmtWhen(item.snoozeUntil);
+    meta.appendChild(sn);
   }
-  if (!item.done && item.p10Date && !p10Reached(item)) {
+  if (!item.done && !isBday(item) && item.p10Date && !p10Reached(item)) {
     const up = document.createElement("span");
     up.className = "subNote";
-    up.textContent = "⚡ becomes P10 on " + fmtDateStr(item.p10Date);
-    mid.appendChild(up);
+    up.textContent = "⚡ 10 on " + fmtDateStr(item.p10Date);
+    meta.appendChild(up);
   }
+  if (meta.children.length > 0) mid.appendChild(meta);
 
   const p = effPrio(item);
   const prio = document.createElement("span");
   prio.className = "prio " + prioClass(p);
-  prio.textContent = "P" + p + (!item.done && p10Reached(item) && item.priority !== 10 ? " ⚡" : "");
+  prio.textContent = p + (!item.done && !isBday(item) && p10Reached(item) && item.priority !== 10 ? " ⚡" : "");
 
   li.append(check, mid, prio);
   return li;
@@ -859,6 +988,7 @@ function renderItem(item) {
 function toggle(id) {
   const item = byId(id);
   if (!item) return;
+  if (!item.done && isBday(item)) { rollBday(item); return; }
   item.done = !item.done;
   item.completedAt = item.done ? Date.now() : null;
   markDirty();
@@ -871,11 +1001,14 @@ function addItem() {
   const nameInput = document.getElementById("newItem");
   const name = nameInput.value.trim();
   if (!name) { toast("Give the task a name first."); return; }
-  const p10 = document.getElementById("newP10").value || null;
+  const isB = addTagSel.has("Bday");
   state.items.push({
     id: uid(), name,
     details: document.getElementById("newDetails").value.trim(),
-    priority: addPriority, p10Date: p10, tags: [...addTagSel],
+    priority: addPriority,
+    p10Date: isB ? null : (document.getElementById("newP10").value || null),
+    bdayDate: isB ? getBdaySel("addBdayDay", "addBdayMon") : null,
+    tags: [...addTagSel],
     done: false, createdAt: Date.now(), completedAt: null, snoozeUntil: null,
   });
   nameInput.value = "";
@@ -884,7 +1017,8 @@ function addItem() {
   addPriority = 5;
   addTagSel.clear();
   buildPrioPicker(document.getElementById("addPrio"), () => addPriority, p => { addPriority = p; });
-  buildTagChips(document.getElementById("addTags"), addTagSel);
+  buildTagChips(document.getElementById("addTags"), addTagSel, updateAddFormMode);
+  updateAddFormMode();
   markDirty();
   render();
   toast("Added: " + name);
@@ -903,8 +1037,10 @@ function openDetail(id) {
   document.getElementById("dName").value = item.name;
   document.getElementById("dDetails").value = item.details;
   document.getElementById("dP10").value = item.p10Date || "";
+  setBdaySel("dBdayDay", "dBdayMon", item.bdayDate);
   buildPrioPicker(document.getElementById("dPrio"), () => editPriority, p => { editPriority = p; });
-  buildTagChips(document.getElementById("dTags"), editTagSel);
+  buildTagChips(document.getElementById("dTags"), editTagSel, updateSheetMode);
+  updateSheetMode();
 
   const snRow = document.getElementById("dSnoozeRow");
   if (!item.done && isSnoozed(item)) {
@@ -937,10 +1073,12 @@ function saveDetail() {
   if (!item) { closeDetail(); return; }
   const name = document.getElementById("dName").value.trim();
   if (!name) { toast("Name can't be empty."); return; }
+  const isB = editTagSel.has("Bday");
   item.name = name;
   item.details = document.getElementById("dDetails").value.trim();
   item.priority = editPriority;
-  item.p10Date = document.getElementById("dP10").value || null;
+  item.p10Date = isB ? null : (document.getElementById("dP10").value || null);
+  item.bdayDate = isB ? getBdaySel("dBdayDay", "dBdayMon") : null;
   item.tags = [...editTagSel];
   markDirty();
   closeDetail();
@@ -962,7 +1100,7 @@ function deleteDetail() {
 // ---------- backup / restore ----------
 
 function backupPayload() {
-  return JSON.stringify({ app: "todo", version: 3, exportedAt: new Date().toISOString(), items: state.items });
+  return JSON.stringify({ app: "todo", version: 4, exportedAt: new Date().toISOString(), items: state.items });
 }
 
 function backupDone() {
@@ -1090,7 +1228,9 @@ function toast(msg) {
 
 document.getElementById("addSubmit").onclick = addItem;
 buildPrioPicker(document.getElementById("addPrio"), () => addPriority, p => { addPriority = p; });
-buildTagChips(document.getElementById("addTags"), addTagSel);
+initBdaySelects("addBdayDay", "addBdayMon");
+initBdaySelects("dBdayDay", "dBdayMon");
+buildTagChips(document.getElementById("addTags"), addTagSel, updateAddFormMode);
 document.getElementById("newP10Clear").onclick = () => { document.getElementById("newP10").value = ""; };
 document.getElementById("dP10Clear").onclick = () => { document.getElementById("dP10").value = ""; };
 

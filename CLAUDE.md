@@ -13,12 +13,13 @@ home-screen web app installed via Safari's "Add to Home Screen".
 - **All data lives in `localStorage`** on the phone (key `todo.v1`) — by explicit
   choice, nothing leaves the device. Loss protection is manual email backups.
 - State shape: `{ items: [], lastBackupAt, dirtySince }`. Item fields: `id, name,
-  details, priority (1–10, 10 = highest), p10Date ("YYYY-MM-DD" or null), tags,
-  done, createdAt, completedAt, snoozeUntil (ms timestamp or null)`.
+  details, priority (1–10, 10 = highest), p10Date ("YYYY-MM-DD" or null),
+  bdayDate ("MM-DD" or null), tags, done, createdAt, completedAt,
+  snoozeUntil (ms timestamp or null)`.
 - `normalizeItem()` migrates any older/backup item shape on load and on restore —
   keep it tolerant of missing fields when adding new ones.
 
-## Features (as of 2026-07-21)
+## Features (as of 2026-07-22)
 
 - **Three tabs** (bottom bar): **Current**, **List**, **Add Task**.
 - **Current**: shows the single top task by *effective* priority
@@ -26,13 +27,20 @@ home-screen web app installed via Safari's "Add to Home Screen".
   first). Buttons: Done, 1 Hour / 1 Day / 1 Week / 1 Month (snooze — hides the task
   from Current until then), Reduce Priority (−1; on a date-escalated task it instead
   sets priority 9 and clears `p10Date`, otherwise the date would keep it pinned at 10).
-- **List**: filter chips (All / Admin / Reading / Watching), active tasks sorted by
+- **List**: filter chips (All / Admin / Read / Watch / Bday), active tasks sorted by
   effective priority, collapsible Completed section, "Clear completed",
   Backup & restore panel at the bottom.
 - **Add Task**: name, details, priority picker, optional "Priority 10 date"
   (task auto-escalates to P10 on that date), tag chips.
 - **Detail sheet** (tap any task name): edit everything, un-snooze, Mark Uncomplete
   (for completed tasks), delete.
+- **Bday tasks** (recurring birthdays): selecting the `Bday` tag swaps the priority
+  + P10-date controls for day/month selects (`bdayDate` "MM-DD"). Priority is fully
+  automatic (`bdayPrio`): 1 when >91 days out, linear up to 10 at ≤14 days.
+  "Done" / the check circle never completes them — `rollBday()` snoozes to the day
+  after the date, so they recur yearly. Lists show "🎂 1 Feb · Nd" countdown.
+  Priority badges show the bare number (no "P" prefix); tags/snooze/countdown share
+  one `metaRow` line to keep list rows compact.
 - **Backup**: when last backup >48h old AND there are unbacked changes
   (`backupOverdue()`), the Current tab replaces the top task with a "Backup To Do
   List" pseudo-task whose only button is "Email backup"; other tabs show a banner.
@@ -46,7 +54,7 @@ home-screen web app installed via Safari's "Add to Home Screen".
 
 1. Edit files locally (this folder is the repo).
 2. **Always bump `CACHE` in `sw.js`** (`todo-vN`) with any change, or phones keep
-   the stale cached version. Currently `todo-v5`.
+   the stale cached version. Currently `todo-v6`.
 3. Smoke check: `python -m http.server 8642 --directory .` then fetch
    `index.html` and grep for the new element IDs (no browser automation available —
    Hugh declined the Chrome extension; he tests on his phone).
@@ -63,8 +71,9 @@ home-screen web app installed via Safari's "Add to Home Screen".
   the fixed tab bar; `env(safe-area-inset-*)` everywhere; date inputs need
   `-webkit-appearance: none`.
 - Light/dark theme via CSS variables + `prefers-color-scheme` — style both.
-- Tags are the hardcoded `TAGS` array (Admin / Reading / Watching) — Hugh called
-  these examples; a tag-management UI may be requested later.
+- Tags are the hardcoded `TAGS` array (Admin / Read / Watch / Bday); `TAG_RENAMES`
+  in `normalizeItem` migrates old stored/backup tags (Reading→Read, Watching→Watch).
+  A tag-management UI may be requested later.
 - Hugh described himself as non-developer-ish: explain trade-offs in plain terms,
   flag anything that risks his data, and let him test on the phone before piling on
   more changes.
