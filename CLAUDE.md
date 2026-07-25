@@ -19,7 +19,7 @@ home-screen web app installed via Safari's "Add to Home Screen".
 - `normalizeItem()` migrates any older/backup item shape on load and on restore —
   keep it tolerant of missing fields when adding new ones.
 
-## Features (as of 2026-07-22)
+## Features (as of 2026-07-25)
 
 - **Three tabs** (bottom bar): **Current**, **List**, **Add Task**.
 - **Current**: shows the single top task by *effective* priority
@@ -84,3 +84,7 @@ home-screen web app installed via Safari's "Add to Home Screen".
 - Hugh described himself as non-developer-ish: explain trade-offs in plain terms,
   flag anything that risks his data, and let him test on the phone before piling on
   more changes.
+- Hugh's real birthday/anniversary tasks (Dad's, Seb's, Jeremy's, Jen's, Mum's,
+  Lachie's birthdays, Christmas, Emily's birthday, Valentine's Day, Mother's Day)
+  were imported into his live app via "Import & add" — that's runtime data, not
+  in this repo, so it won't show up in the code.
