@@ -40,8 +40,10 @@ video → Watch), fed by the Gmail link tracker on Hugh's PC
 - **The phone is the master list; Gmail is a temporary holding place.** Hugh's routine:
   email links → PC refresh → import links.json on the phone → archive the emails. So
   **`importCatalog` never deletes anything**: the phone's `done / notes / order / removed /
-  listUser` win, the file only refreshes title, source, minutes, summary, and links the
-  phone hasn't seen are added. links.json contains every link ever seen (archived rows
+  listUser / titleUser / minutesUser` win, the file only refreshes source, summary and any
+  title / minutes Hugh hasn't edited, and links the phone hasn't seen are added.
+  `titleUser` / `minutesUser` are set when he types those on the Add form or changes
+  them in the link sheet; clearing the field hands it back to the import. links.json contains every link ever seen (archived rows
   included) and done/`removed` links stay as hidden records so a re-import can't make
   them "new" again. `manual` = added on the phone; when the same link later arrives from
   Gmail it is upgraded in place. A links.json pasted/chosen in the task *Restore* box is
@@ -116,7 +118,7 @@ video → Watch), fed by the Gmail link tracker on Hugh's PC
 
 1. Edit files locally (this folder is the repo).
 2. **Always bump `CACHE` in `sw.js`** (`todo-vN`) with any change, or phones keep
-   the stale cached version. Currently `todo-v9`. The SW only handles same-origin
+   the stale cached version. Currently `todo-v10`. The SW only handles same-origin
    GETs (cross-origin lookups / sync URL bypass it).
 3. Smoke check: `run_test.py` pattern — copy `index.html` + `links.json` to a scratch
    folder, append a `<script>` that drives the functions and writes results into a

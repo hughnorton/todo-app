@@ -852,8 +852,10 @@ function normalizeLink(l) {
     list: l.list === "watch" ? "watch" : "read",
     listUser: !!l.listUser,                       // true once you've changed the list by hand; imports then leave it alone
     title: typeof l.title === "string" ? l.title : "",
+    titleUser: !!l.titleUser,                     // same idea for a title you typed or edited
     source: typeof l.source === "string" ? l.source : "",
     minutes,
+    minutesUser: !!l.minutesUser,                 // and for a length you typed or edited
     summary: typeof l.summary === "string" ? l.summary : "",
     date: (typeof l.date === "string" && /^\d{4}-\d{2}-\d{2}/.test(l.date)) ? l.date.slice(0, 10) : null,
     addedAt: typeof l.addedAt === "number" ? l.addedAt : Date.now(),
@@ -1837,8 +1839,8 @@ function addLink() {
 
   const item = normalizeLink({
     id, url, kind: guessKind(url), list: addLinkList, listUser: true,
-    title, source: hostOf(parsed), minutes, notes, manual: true,
-    date: new Date().toISOString().slice(0, 10),
+    title, titleUser: !!title, source: hostOf(parsed), minutes, minutesUser: minutes != null,
+    notes, manual: true, date: new Date().toISOString().slice(0, 10),
   });
   state.links.items.push(item);
   urlEl.value = "";
@@ -1991,9 +1993,12 @@ function openLinkDetail(id) {
 function saveLinkDetail() {
   const item = linkById(editingLinkId);
   if (!item) { closeDetail(); return; }
-  item.title = document.getElementById("lTitle").value.trim();
+  // A title or length you change is yours from then on; clearing it hands it back to the import.
+  const newTitle = document.getElementById("lTitle").value.trim();
+  if (newTitle !== item.title) { item.title = newTitle; item.titleUser = !!newTitle; }
   const minsRaw = parseFloat(document.getElementById("lMinutes").value);
-  item.minutes = isFinite(minsRaw) && minsRaw >= 0 ? minsRaw : null;
+  const newMinutes = isFinite(minsRaw) && minsRaw >= 0 ? minsRaw : null;
+  if (newMinutes !== item.minutes) { item.minutes = newMinutes; item.minutesUser = newMinutes != null; }
   item.notes = document.getElementById("lNotes").value.trim();
   if (item.list !== editLinkList) {
     state.links.order[item.list] = state.links.order[item.list].filter(x => x !== item.id);
@@ -2026,9 +2031,10 @@ function summarizeImport(r) {
 }
 
 // Merge a links.json catalogue into the phone's lists. The phone is the master copy:
-// links already here keep their done / notes / order / removed state (the file only
-// refreshes title, source, length and summary), links it hasn't seen are added, and
-// nothing is ever deleted by an import — so archiving the emails in Gmail afterwards is safe.
+// links already here keep their done / notes / order / removed state and any title, length
+// or list you've set by hand (the file only refreshes source, summary and un-edited title /
+// length), links it hasn't seen are added, and nothing is ever deleted by an import — so
+// archiving the emails in Gmail afterwards is safe.
 function importCatalog(cat) {
   if (!cat || cat.app !== LINKS_APP || !Array.isArray(cat.items)) return { ok: false };
   const local = new Map(state.links.items.map(i => [i.id, i]));
@@ -2042,9 +2048,9 @@ function importCatalog(cat) {
     if (cur) {
       cur.url = inc.url;
       cur.kind = inc.kind;
-      if (inc.title) cur.title = inc.title;
+      if (inc.title && !cur.titleUser) cur.title = inc.title;
       if (inc.source) cur.source = inc.source;
-      if (inc.minutes != null) cur.minutes = inc.minutes;
+      if (inc.minutes != null && !cur.minutesUser) cur.minutes = inc.minutes;
       if (inc.summary) cur.summary = inc.summary;
       if (inc.date) cur.date = inc.date;
       if (!cur.listUser) cur.list = inc.list;
