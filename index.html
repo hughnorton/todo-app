@@ -134,6 +134,7 @@
   }
   .subNote { color: var(--muted); font-size: 0.75rem; }
   .metaRow { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
+  p.hint { color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
 
   .seg { display: grid; grid-template-columns: repeat(5, 1fr); gap: 5px; }
   .seg button {
@@ -146,6 +147,20 @@
     font-weight: 700;
   }
   .seg button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+
+  /* Admin / Read / Watch switch at the top of Current and List (and Task / Link on Add) */
+  .modeSeg { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-bottom: 12px; }
+  .modeSeg.two { grid-template-columns: 1fr 1fr; }
+  .modeSeg button {
+    background: var(--card);
+    border: 1px solid var(--line);
+    color: var(--muted);
+    border-radius: 11px;
+    padding: 10px 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+  }
+  .modeSeg button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 
   .fieldLabel { display: block; color: var(--muted); font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 14px 0 6px; }
   .txtInput, .dateInput, .txtArea {
@@ -166,6 +181,19 @@
   .dateHintRow { display: flex; align-items: center; gap: 8px; }
   .dateHintRow .dateInput { flex: 1; }
   .clearDateBtn { background: none; border: 1px solid var(--line); color: var(--muted); border-radius: 9px; padding: 9px 12px; font-size: 0.85rem; flex-shrink: 0; }
+
+  .bigBtn {
+    width: 100%;
+    margin-top: 18px;
+    background: var(--accent);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 15px 0;
+    font-size: 1.05rem;
+    font-weight: 650;
+  }
+  .emptyMsg { color: var(--muted); text-align: center; padding: 30px 0; font-size: 0.95rem; line-height: 1.6; }
 
   /* ---------- current page ---------- */
   #currentCard {
@@ -204,20 +232,108 @@
     font-weight: 650;
   }
 
-  /* ---------- add page ---------- */
-  #addBox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
-  #addBox .fieldLabel:first-child { margin-top: 0; }
-  #addSubmit {
-    width: 100%;
-    margin-top: 18px;
-    background: var(--accent);
+  /* ---------- read / watch lists ---------- */
+  .linkTools { display: flex; flex-direction: column; gap: 7px; margin-bottom: 10px; }
+  .linkTools .chipRow { gap: 6px; }
+  .linkTools .chip { padding: 5px 11px; font-size: 0.8rem; }
+  .linkSummary { color: var(--muted); font-size: 0.8rem; margin: 0 2px 10px; }
+
+  .kindBadge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 6px;
+    padding: 1px 7px;
+    font-size: 0.72rem;
+    font-weight: 700;
     color: #fff;
-    border: none;
-    border-radius: 12px;
-    padding: 15px 0;
-    font-size: 1.05rem;
-    font-weight: 650;
+    background: var(--pMid);
+    flex-shrink: 0;
   }
+  .kindBadge.video { background: var(--pTop); }
+  .kindBadge.tweet { background: var(--pLow); }
+  .kindBadge.article { background: var(--pMid); }
+  .kindBadge.other { background: var(--pHigh); }
+
+  .linkCard {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    padding: 14px 15px;
+    margin-bottom: 10px;
+  }
+  .linkCard .metaRow { margin-bottom: 7px; }
+  .linkCard .title {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--text);
+    font-size: 1.08rem;
+    font-weight: 650;
+    line-height: 1.3;
+    word-break: break-word;
+    padding: 0;
+  }
+  .linkCard .blurb {
+    color: var(--muted);
+    font-size: 0.88rem;
+    line-height: 1.4;
+    margin-top: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    word-break: break-word;
+    white-space: pre-line;
+  }
+  .linkCard .btns { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .linkCard .btns button, .linkCard .btns a {
+    border: none;
+    border-radius: 11px;
+    padding: 12px 0;
+    font-size: 0.92rem;
+    font-weight: 650;
+    background: var(--accent-soft);
+    color: var(--accent);
+    text-align: center;
+    text-decoration: none;
+    display: block;
+  }
+  .linkCard .btns .open { background: var(--accent); color: #fff; }
+  .linkCard .btns .later { background: var(--bg); border: 1px solid var(--line); color: var(--muted); }
+
+  #linkBar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 10px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+  }
+  #linkBar .btnRow { display: flex; gap: 6px; }
+  #linkBar button.action { padding: 7px 11px; font-size: 0.82rem; }
+
+  li.item .orderBtns { display: flex; gap: 3px; flex-shrink: 0; }
+  li.item .orderBtns button {
+    width: 31px;
+    height: 32px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.9rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  li.item .orderBtns button:disabled { opacity: 0.3; }
+  li.item .mins { color: var(--muted); font-size: 0.8rem; font-weight: 700; flex-shrink: 0; min-width: 44px; text-align: right; }
+
+  /* ---------- add page ---------- */
+  #addBox, #addLinkBox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  #addBox .fieldLabel:first-child, #addLinkBox .fieldLabel:first-child { margin-top: 0; }
 
   /* ---------- list page ---------- */
   #filterRow { margin-bottom: 12px; }
@@ -248,9 +364,8 @@
   li.item .name { font-size: 1rem; word-break: break-word; text-align: left; background: none; border: none; color: var(--text); padding: 0; }
   li.item.done .name { color: var(--muted); text-decoration: line-through; }
   li.item.snoozed { opacity: 0.62; }
-  #emptyMsg { color: var(--muted); text-align: center; padding: 30px 0; font-size: 0.95rem; }
 
-  #doneHeader {
+  .doneHeader {
     display: none;
     width: 100%;
     background: none; border: none;
@@ -262,10 +377,10 @@
     text-transform: uppercase;
     letter-spacing: 0.05em;
   }
-  #doneHeader.show { display: block; }
-  #doneList.collapsed { display: none; }
-  #clearDoneBtn { display: none; margin: 4px auto 0; background: none; border: none; color: var(--muted); font-size: 0.85rem; text-decoration: underline; padding: 6px; }
-  #clearDoneBtn.show { display: block; }
+  .doneHeader.show { display: block; }
+  ul.collapsed { display: none; }
+  .clearDoneBtn { display: none; margin: 4px auto 0; background: none; border: none; color: var(--muted); font-size: 0.85rem; text-decoration: underline; padding: 6px; }
+  .clearDoneBtn.show { display: block; }
 
   #toolsToggle {
     display: block;
@@ -279,7 +394,7 @@
   #tools { display: none; margin-top: 10px; background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px; }
   #tools.show { display: block; }
   #tools h2 { font-size: 1rem; margin-bottom: 4px; }
-  #tools p.hint { color: var(--muted); font-size: 0.82rem; margin-bottom: 10px; }
+  #tools h2 + p.hint { margin-bottom: 10px; }
   #tools .btnRow { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
   button.action {
     background: var(--accent-soft);
@@ -303,7 +418,7 @@
     margin-bottom: 8px;
   }
 
-  /* ---------- detail sheet ---------- */
+  /* ---------- detail sheets ---------- */
   #overlay {
     position: fixed;
     inset: 0;
@@ -314,7 +429,7 @@
     z-index: 40;
   }
   #overlay.show { display: flex; }
-  #detailSheet {
+  .sheet {
     background: var(--card);
     width: 100%;
     max-width: 560px;
@@ -324,15 +439,41 @@
     border-radius: 20px 20px 0 0;
     padding: 18px 18px calc(env(safe-area-inset-bottom) + 18px);
   }
-  #detailSheet .sheetHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
-  #detailSheet .sheetHead h2 { font-size: 1.15rem; }
-  #closeSheet { background: none; border: none; color: var(--muted); font-size: 1.5rem; padding: 2px 8px; }
-  #dSnoozeRow, #dDoneRow { display: none; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 11px; padding: 10px 12px; font-size: 0.85rem; color: var(--muted); }
-  #dSnoozeRow.show, #dDoneRow.show { display: flex; }
-  #dMeta { color: var(--muted); font-size: 0.78rem; margin-top: 14px; }
-  #sheetBtns { display: flex; gap: 9px; margin-top: 18px; }
-  #dSave { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 14px 0; font-size: 1rem; font-weight: 650; }
-  #dDelete { background: none; border: 1px solid var(--line); color: var(--danger); border-radius: 12px; padding: 14px 18px; font-size: 0.95rem; font-weight: 600; }
+  .sheet .sheetHead { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+  .sheet .sheetHead h2 { font-size: 1.15rem; }
+  .closeSheet { background: none; border: none; color: var(--muted); font-size: 1.5rem; padding: 2px 8px; }
+  .infoRow { display: none; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; background: var(--bg); border: 1px solid var(--line); border-radius: 11px; padding: 10px 12px; font-size: 0.85rem; color: var(--muted); }
+  .infoRow.show { display: flex; }
+  .sheetMeta { color: var(--muted); font-size: 0.78rem; margin-top: 14px; word-break: break-all; }
+  .sheetBtns { display: flex; gap: 9px; margin-top: 18px; }
+  .sheetSave { flex: 1; background: var(--accent); color: #fff; border: none; border-radius: 12px; padding: 14px 0; font-size: 1rem; font-weight: 650; }
+  .sheetDelete { background: none; border: 1px solid var(--line); color: var(--danger); border-radius: 12px; padding: 14px 18px; font-size: 0.95rem; font-weight: 600; }
+  .summaryBox {
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 11px;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    line-height: 1.45;
+    color: var(--muted);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 220px;
+    overflow-y: auto;
+  }
+  .openBtn {
+    display: block;
+    text-align: center;
+    background: var(--accent);
+    color: #fff;
+    border-radius: 12px;
+    padding: 14px 0;
+    font-size: 1rem;
+    font-weight: 650;
+    text-decoration: none;
+    margin-top: 16px;
+  }
+  .sheetRow { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 
   /* ---------- tab bar ---------- */
   #tabbar {
@@ -394,39 +535,70 @@
 
 <!-- ================= CURRENT PAGE ================= -->
 <div id="page-current" class="page">
-  <div id="currentCard">
-    <div class="topRow">
-      <span class="prio" id="currentPrio"></span>
-      <div class="tagList" id="currentTags"></div>
+  <div class="modeSeg" id="modeSegCurrent"></div>
+
+  <div id="currentAdmin">
+    <div id="currentCard">
+      <div class="topRow">
+        <span class="prio" id="currentPrio"></span>
+        <div class="tagList" id="currentTags"></div>
+      </div>
+      <button id="currentName"></button>
+      <div id="currentDetails"></div>
+      <div id="currentBtns">
+        <button id="curDone">✓ Done</button>
+        <button id="cur1h">1 Hour</button>
+        <button id="cur1d">1 Day</button>
+        <button id="cur1w">1 Week</button>
+        <button id="cur1m">1 Month</button>
+        <button id="curReduce">Reduce Priority</button>
+      </div>
+      <div id="backupBtns">
+        <button id="backupNowBtn">✉ Email backup</button>
+      </div>
     </div>
-    <button id="currentName"></button>
-    <div id="currentDetails"></div>
-    <div id="currentBtns">
-      <button id="curDone">✓ Done</button>
-      <button id="cur1h">1 Hour</button>
-      <button id="cur1d">1 Day</button>
-      <button id="cur1w">1 Week</button>
-      <button id="cur1m">1 Month</button>
-      <button id="curReduce">Reduce Priority</button>
-    </div>
-    <div id="backupBtns">
-      <button id="backupNowBtn">✉ Email backup</button>
-    </div>
+    <div id="currentEmpty" hidden></div>
   </div>
-  <div id="currentEmpty" hidden></div>
+
+  <div id="currentLinks" hidden>
+    <div class="linkTools" id="curLinkTools"></div>
+    <div class="linkSummary" id="curLinkSummary"></div>
+    <div id="curLinkCards"></div>
+    <p id="curLinkEmpty" class="emptyMsg" hidden></p>
+  </div>
 </div>
 
 <!-- ================= LIST PAGE ================= -->
 <div id="page-list" class="page">
-  <div class="chipRow" id="filterRow"></div>
+  <div class="modeSeg" id="modeSegList"></div>
 
-  <ul id="activeList"></ul>
-  <p id="emptyMsg" hidden></p>
-  <button id="doneHeader">Completed (<span id="doneCount">0</span>) — tap to show/hide</button>
-  <ul id="doneList" class="collapsed"></ul>
-  <button id="clearDoneBtn">Clear completed</button>
+  <div id="listAdmin">
+    <div class="chipRow" id="filterRow"></div>
+    <ul id="activeList"></ul>
+    <p id="emptyMsg" class="emptyMsg" hidden></p>
+    <button id="doneHeader" class="doneHeader">Completed (<span id="doneCount">0</span>) — tap to show/hide</button>
+    <ul id="doneList" class="collapsed"></ul>
+    <button id="clearDoneBtn" class="clearDoneBtn">Clear completed</button>
+  </div>
 
-  <button id="toolsToggle">Backup &amp; restore</button>
+  <div id="listLinks" hidden>
+    <div id="linkBar">
+      <span id="linkStatus"></span>
+      <div class="btnRow">
+        <button class="action" id="linkRefreshBtn">Refresh</button>
+        <button class="action" id="linkImportBtn">Import file…</button>
+      </div>
+    </div>
+    <div class="linkTools" id="listLinkTools"></div>
+    <ul id="linkActiveList"></ul>
+    <p id="linkEmptyMsg" class="emptyMsg" hidden></p>
+    <button id="linkDoneHeader" class="doneHeader">Completed (<span id="linkDoneCount">0</span>) — tap to show/hide</button>
+    <ul id="linkDoneList" class="collapsed"></ul>
+    <button id="linkClearDoneBtn" class="clearDoneBtn">Clear completed</button>
+  </div>
+  <input id="linkFile" type="file" accept=".json,application/json,text/plain" hidden>
+
+  <button id="toolsToggle">Backup, restore &amp; links</button>
   <div id="tools">
     <h2>Back up</h2>
     <p class="hint" id="backupStatus"></p>
@@ -435,7 +607,7 @@
       <button class="action" id="downloadBackupBtn">Save as file</button>
     </div>
     <h2>Restore</h2>
-    <p class="hint">Paste backup text (or choose a backup file). "Restore" replaces the whole list; "Import &amp; add" adds the pasted items to what's already there.</p>
+    <p class="hint">Paste backup text (or choose a backup file). "Restore" replaces the whole list; "Import &amp; add" adds the pasted tasks to what's already there.</p>
     <textarea id="restoreText" placeholder='Paste backup here, e.g. {"app":"todo", ...}'></textarea>
     <div class="btnRow">
       <button class="action" id="restoreBtn">Restore (replace)</button>
@@ -443,11 +615,27 @@
       <button class="action" id="restoreFileBtn">Choose backup file…</button>
       <input id="restoreFile" type="file" accept=".json,.txt,application/json,text/plain" hidden>
     </div>
+    <h2>Read / Watch links</h2>
+    <p class="hint">The PC refresh writes a <b>links.json</b> file (OneDrive → Documents → Miscellaneous → To Do). Import it here to update the Read and Watch lists. Optionally set a sync URL and the app fetches it by itself when opened.</p>
+    <div class="btnRow">
+      <button class="action" id="linkImportBtn2">Import links.json…</button>
+    </div>
+    <label class="fieldLabel" for="syncUrl">Sync URL — optional</label>
+    <input id="syncUrl" class="txtInput" type="url" placeholder="https://…/links.json" autocomplete="off" autocapitalize="off">
+    <div class="btnRow" style="margin-top:8px">
+      <button class="action" id="syncSaveBtn">Save URL</button>
+      <button class="action" id="syncNowBtn">Fetch now</button>
+    </div>
   </div>
 </div>
 
-<!-- ================= ADD TASK PAGE ================= -->
+<!-- ================= ADD PAGE ================= -->
 <div id="page-add" class="page">
+  <div class="modeSeg two" id="addKindSeg">
+    <button id="addKindTask">Task</button>
+    <button id="addKindLink">Link</button>
+  </div>
+
   <div id="addBox">
     <label class="fieldLabel" for="newItem">Name</label>
     <input id="newItem" class="txtInput" type="text" placeholder="What needs doing?" autocomplete="off">
@@ -480,16 +668,31 @@
         <select id="addBdayRMon" class="dateInput"></select>
       </div>
     </div>
-    <button id="addSubmit">Add Task</button>
+    <button id="addSubmit" class="bigBtn">Add Task</button>
+  </div>
+
+  <div id="addLinkBox" hidden>
+    <label class="fieldLabel" for="newUrl">Link</label>
+    <input id="newUrl" class="txtInput" type="url" placeholder="https://…" autocomplete="off" autocapitalize="off" inputmode="url">
+    <label class="fieldLabel" for="newLinkTitle">Title — optional, looked up automatically if left blank</label>
+    <input id="newLinkTitle" class="txtInput" type="text" autocomplete="off">
+    <label class="fieldLabel">List</label>
+    <div class="chipRow" id="newLinkList"></div>
+    <label class="fieldLabel" for="newLinkMin">Minutes — optional (video length or reading time)</label>
+    <input id="newLinkMin" class="txtInput" type="number" inputmode="decimal" min="0" step="0.5" placeholder="e.g. 12">
+    <label class="fieldLabel" for="newLinkNotes">Notes</label>
+    <textarea id="newLinkNotes" class="txtArea" placeholder="Why you saved it, what to look for…"></textarea>
+    <button id="addLinkSubmit" class="bigBtn">Add Link</button>
+    <p class="hint" style="margin-top:12px">Tip: emailing a link to yourself works too — the PC refresh adds it with a proper title, length and summary.</p>
   </div>
 </div>
 
-<!-- ================= DETAIL SHEET ================= -->
+<!-- ================= DETAIL SHEETS ================= -->
 <div id="overlay">
-  <div id="detailSheet">
+  <div id="detailSheet" class="sheet">
     <div class="sheetHead">
       <h2>Task details</h2>
-      <button id="closeSheet" aria-label="Close">✕</button>
+      <button class="closeSheet" aria-label="Close">✕</button>
     </div>
     <label class="fieldLabel" for="dName">Name</label>
     <input id="dName" class="txtInput" type="text" autocomplete="off">
@@ -522,18 +725,51 @@
     </div>
     <label class="fieldLabel" for="dDetails">Details</label>
     <textarea id="dDetails" class="txtArea" placeholder="Notes, links, anything…"></textarea>
-    <div id="dSnoozeRow">
+    <div id="dSnoozeRow" class="infoRow">
       <span id="dSnoozeMsg"></span>
       <button class="action" id="dUnsnooze">Un-snooze</button>
     </div>
-    <div id="dDoneRow">
+    <div id="dDoneRow" class="infoRow">
       <span id="dDoneMsg"></span>
       <button class="action" id="dUncomplete">Mark Uncomplete</button>
     </div>
-    <div id="dMeta"></div>
-    <div id="sheetBtns">
-      <button id="dSave">Save</button>
-      <button id="dDelete">Delete</button>
+    <div id="dMeta" class="sheetMeta"></div>
+    <div class="sheetBtns">
+      <button id="dSave" class="sheetSave">Save</button>
+      <button id="dDelete" class="sheetDelete">Delete</button>
+    </div>
+  </div>
+
+  <div id="linkSheet" class="sheet" hidden>
+    <div class="sheetHead">
+      <h2>Link details</h2>
+      <button class="closeSheet" aria-label="Close">✕</button>
+    </div>
+    <div class="metaRow" id="lMeta"></div>
+    <a id="lOpen" class="openBtn" target="_blank" rel="noopener">Open link ↗</a>
+    <label class="fieldLabel" for="lTitle">Title</label>
+    <input id="lTitle" class="txtInput" type="text" autocomplete="off">
+    <label class="fieldLabel">List</label>
+    <div class="chipRow" id="lList"></div>
+    <label class="fieldLabel" for="lMinutes">Minutes (video length or reading time)</label>
+    <input id="lMinutes" class="txtInput" type="number" inputmode="decimal" min="0" step="0.5">
+    <label class="fieldLabel">Summary</label>
+    <div id="lSummary" class="summaryBox"></div>
+    <label class="fieldLabel" for="lNotes">My notes</label>
+    <textarea id="lNotes" class="txtArea" placeholder="Why you saved it, what to look for…"></textarea>
+    <div id="lDoneRow" class="infoRow">
+      <span id="lDoneMsg"></span>
+      <button class="action" id="lUncomplete">Mark Uncomplete</button>
+    </div>
+    <div class="sheetRow">
+      <button class="action" id="lTop">⤒ Move to top</button>
+      <button class="action" id="lBottom">⤓ Move to bottom</button>
+      <button class="action" id="lDone">✓ Mark done</button>
+    </div>
+    <div id="lMetaFoot" class="sheetMeta"></div>
+    <div class="sheetBtns">
+      <button id="lSave" class="sheetSave">Save</button>
+      <button id="lRemove" class="sheetDelete">Remove</button>
     </div>
   </div>
 </div>
@@ -542,7 +778,7 @@
 <div id="tabbar">
   <button id="tabCurrent"><span class="ico">◎</span>Current</button>
   <button id="tabList"><span class="ico">☰</span>List</button>
-  <button id="tabAdd"><span class="ico">＋</span>Add Task</button>
+  <button id="tabAdd"><span class="ico">＋</span>Add</button>
 </div>
 
 <div id="toast"></div>
@@ -551,6 +787,7 @@
 "use strict";
 
 const STORE_KEY = "todo.v1";
+const UI_KEY = "todo.ui.v1";
 const BACKUP_REMIND_MS = 48 * 60 * 60 * 1000; // remind when the last backup is older than 2 days
 const BACKUP_EMAIL = "hughnorton7@gmail.com";
 const TAGS = ["Admin", "Read", "Watch", "Bday"];
@@ -558,14 +795,35 @@ const TAG_RENAMES = { Reading: "Read", Watching: "Watch" };
 const MONTH_NAMES = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const HOUR = 3600 * 1000, DAY = 24 * HOUR, WEEK = 7 * DAY, MONTH = 30 * DAY;
 
+// Read / Watch link lists
+const LINKS_APP = "todo-links";            // "app" field of links.json written by Gmail_Enhance.py
+const SYNC_STALE_MS = 30 * 60 * 1000;      // auto-fetch the sync URL at most every 30 min
+const MODES = [["admin", "Admin"], ["read", "Read"], ["watch", "Watch"]];
+const LISTS = ["read", "watch"];
+const KINDS = ["Video", "Article", "Tweet", "Other"];
+const SORTS = [["order", "My order"], ["short", "Shortest"], ["long", "Longest"], ["new", "Newest"]];
+// Length buckets per list: [bucket key, label]; thresholds in LEN_SPLIT (minutes).
+const LEN_BUCKETS = {
+  read: [["any", "Any length"], ["s", "≤ 5 min"], ["m", "5–15 min"], ["l", "15+ min"]],
+  watch: [["any", "Any length"], ["s", "≤ 15 min"], ["m", "15–45 min"], ["l", "45+ min"]],
+};
+const LEN_SPLIT = { read: [5, 15], watch: [15, 45] };
+const KIND_FILTERS = { read: [["all", "All"], ["article", "Articles"], ["tweet", "Tweets"]], watch: [] };
+const TRACKING_PARAMS = new Set(["utm_source", "utm_medium", "utm_campaign", "utm_content", "utm_term", "si", "s", "t", "rcm", "fbclid", "gclid"]);
+
 let state = load();
+let ui = loadUi();
 let activeTab = "current";
 let filterTag = null;        // null = all
 let addPriority = 5;
 let addTagSel = new Set();
+let addKind = "task";        // Add page: "task" or "link"
+let addLinkList = "read";
 let editingId = null;
 let editPriority = 5;
 let editTagSel = new Set();
+let editingLinkId = null;
+let editLinkList = "read";
 
 function normalizeItem(i) {
   return {
@@ -583,6 +841,44 @@ function normalizeItem(i) {
   };
 }
 
+// A saved link (article / video / tweet). Tolerant of the links.json shape and older stored shapes.
+function normalizeLink(l) {
+  const url = typeof l.url === "string" ? l.url.trim() : "";
+  const minutes = typeof l.minutes === "number" && isFinite(l.minutes) && l.minutes >= 0 ? l.minutes : null;
+  return {
+    id: (typeof l.id === "string" && l.id) ? l.id : (linkId(url) || uid()),
+    url,
+    kind: KINDS.includes(l.kind) ? l.kind : guessKind(url),
+    list: l.list === "watch" ? "watch" : "read",
+    listUser: !!l.listUser,                       // true once you've changed the list by hand; imports then leave it alone
+    title: typeof l.title === "string" ? l.title : "",
+    source: typeof l.source === "string" ? l.source : "",
+    minutes,
+    summary: typeof l.summary === "string" ? l.summary : "",
+    date: (typeof l.date === "string" && /^\d{4}-\d{2}-\d{2}/.test(l.date)) ? l.date.slice(0, 10) : null,
+    addedAt: typeof l.addedAt === "number" ? l.addedAt : Date.now(),
+    manual: !!l.manual,                           // added on the phone (never pruned by an import)
+    done: !!l.done,
+    completedAt: l.completedAt || null,
+    removed: !!l.removed,                         // hidden for good, even if an import brings it back
+    notes: typeof l.notes === "string" ? l.notes : "",
+  };
+}
+
+function normalizeLinks(src) {
+  const s = src && typeof src === "object" ? src : {};
+  const items = Array.isArray(s.items) ? s.items.filter(x => x && typeof x === "object").map(normalizeLink) : [];
+  const ids = new Set(items.map(i => i.id));
+  const ord = s.order && typeof s.order === "object" ? s.order : {};
+  const clean = a => Array.isArray(a) ? a.filter((id, i) => typeof id === "string" && ids.has(id) && a.indexOf(id) === i) : [];
+  return {
+    items,
+    order: { read: clean(ord.read), watch: clean(ord.watch) },   // your preferred order, top first
+    catalogAt: typeof s.catalogAt === "string" ? s.catalogAt : null,
+    importedAt: typeof s.importedAt === "number" ? s.importedAt : null,
+  };
+}
+
 function load() {
   try {
     const raw = localStorage.getItem(STORE_KEY);
@@ -590,11 +886,12 @@ function load() {
       const s = JSON.parse(raw);
       if (Array.isArray(s.items)) {
         s.items = s.items.map(normalizeItem);
+        s.links = normalizeLinks(s.links);
         return s;
       }
     }
   } catch (e) { /* fall through to fresh state */ }
-  return { items: [], lastBackupAt: null, dirtySince: null };
+  return { items: [], links: normalizeLinks(null), lastBackupAt: null, dirtySince: null };
 }
 
 function save() {
@@ -604,6 +901,23 @@ function save() {
 function markDirty() {
   if (!state.dirtySince) state.dirtySince = Date.now();
   save();
+}
+
+// UI preferences (mode, sort, filters, sync URL) — kept out of the backup on purpose.
+function loadUi() {
+  const d = { mode: "admin", sort: { read: "order", watch: "order" }, len: { read: "any", watch: "any" },
+              kind: { read: "all", watch: "all" }, syncUrl: "", lastSyncAt: null };
+  try {
+    const s = JSON.parse(localStorage.getItem(UI_KEY) || "{}");
+    const out = { ...d, ...s, sort: { ...d.sort, ...(s.sort || {}) }, len: { ...d.len, ...(s.len || {}) }, kind: { ...d.kind, ...(s.kind || {}) } };
+    if (!MODES.some(m => m[0] === out.mode)) out.mode = "admin";
+    if (typeof out.syncUrl !== "string") out.syncUrl = "";
+    return out;
+  } catch (e) { return d; }
+}
+
+function saveUi() {
+  try { localStorage.setItem(UI_KEY, JSON.stringify(ui)); } catch (e) { /* ignore */ }
 }
 
 function uid() {
@@ -682,10 +996,63 @@ function byId(id) {
   return state.items.find(i => i.id === id);
 }
 
+function linkById(id) {
+  return state.links.items.find(i => i.id === id);
+}
+
 // Backup is due when there are unbacked-up changes and the last backup is over 48h old (or never happened).
 function backupOverdue() {
-  return state.items.length > 0 && !!state.dirtySince &&
+  return (state.items.length > 0 || state.links.items.length > 0) && !!state.dirtySince &&
     (!state.lastBackupAt || Date.now() - state.lastBackupAt > BACKUP_REMIND_MS);
+}
+
+// ---------- link identity (mirrors link_id() in Gmail_Enhance.py — keep in sync) ----------
+
+function hostOf(u) {
+  let host = u.hostname.toLowerCase();
+  if (host.startsWith("www.")) host = host.slice(4);
+  return host;
+}
+
+function youtubeId(u) {
+  if (u.hostname.endsWith("youtu.be")) return u.pathname.split("/").filter(Boolean)[0] || "";
+  if (u.searchParams.get("v")) return u.searchParams.get("v");
+  const m = u.pathname.match(/\/(shorts|embed|live)\/([A-Za-z0-9_-]{6,})/);
+  return m ? m[2] : "";
+}
+
+function linkId(url) {
+  let u;
+  try { u = new URL(url); } catch (e) { return ""; }
+  const host = hostOf(u);
+  if (["youtube.com", "youtu.be", "m.youtube.com"].includes(host)) {
+    const v = youtubeId(u);
+    if (v) return "yt:" + v;
+  }
+  if (["x.com", "twitter.com", "mobile.twitter.com"].includes(host)) {
+    const m = u.pathname.match(/\/status\/(\d+)/);
+    if (m) return "tw:" + m[1];
+  }
+  const keys = [...new Set([...u.searchParams.keys()])].filter(k => !TRACKING_PARAMS.has(k)).sort();
+  const q = keys.map(k => k + "=" + u.searchParams.get(k)).join("&");
+  return "url:" + host + u.pathname.replace(/\/+$/, "") + (q ? "?" + q : "");
+}
+
+function guessKind(url) {
+  let u;
+  try { u = new URL(url); } catch (e) { return "Other"; }
+  const host = hostOf(u);
+  if (["youtube.com", "youtu.be", "m.youtube.com", "vimeo.com"].includes(host)) return "Video";
+  if (["x.com", "twitter.com", "mobile.twitter.com"].includes(host)) return "Tweet";
+  return "Article";
+}
+
+function prettyUrl(url) {
+  try {
+    const u = new URL(url);
+    const p = u.pathname.length > 1 ? u.pathname.replace(/\/$/, "") : "";
+    return hostOf(u) + (p.length > 40 ? p.slice(0, 40) + "…" : p);
+  } catch (e) { return url; }
 }
 
 // ---------- shared widgets ----------
@@ -721,6 +1088,31 @@ function buildTagChips(container, selSet, onChange) {
       buildTagChips(container, selSet, onChange);
       if (onChange) onChange();
     };
+    container.appendChild(b);
+  }
+}
+
+// Single-choice chip row: options = [[value, label], ...].
+function buildChoiceChips(container, options, current, onPick) {
+  container.innerHTML = "";
+  for (const [value, label] of options) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "chip" + (current === value ? " on" : "");
+    b.textContent = label;
+    b.onclick = () => onPick(value);
+    container.appendChild(b);
+  }
+}
+
+function buildModeSeg(container) {
+  container.innerHTML = "";
+  for (const [mode, label] of MODES) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = label;
+    b.classList.toggle("on", ui.mode === mode);
+    b.onclick = () => { ui.mode = mode; saveUi(); render(); };
     container.appendChild(b);
   }
 }
@@ -811,6 +1203,30 @@ function fmtDateStr(dateStr) {
   return new Date(dateStr + "T00:00").toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 }
 
+function fmtShortDate(dateStr) {
+  const d = new Date(dateStr + "T00:00");
+  const thisYear = d.getFullYear() === new Date().getFullYear();
+  return d.getDate() + " " + MONTH_NAMES[d.getMonth()] + (thisYear ? "" : " " + String(d.getFullYear()).slice(2));
+}
+
+function fmtMins(m) {
+  if (m == null) return "? min";
+  if (m < 60) return (m < 10 ? Math.round(m * 10) / 10 : Math.round(m)) + " min";
+  const h = Math.floor(m / 60), r = Math.round(m - h * 60);
+  return h + "h" + (r ? " " + String(r).padStart(2, "0") + "m" : "");
+}
+
+function kindBadge(kind) {
+  const s = document.createElement("span");
+  s.className = "kindBadge " + kind.toLowerCase();
+  s.textContent = { Video: "▶ Video", Article: "📄 Article", Tweet: "𝕏 Tweet", Other: "🔗 Link" }[kind] || kind;
+  return s;
+}
+
+function linkTitle(item) {
+  return item.title || prettyUrl(item.url) || "(untitled)";
+}
+
 // ---------- current page ----------
 
 function pickCurrent() {
@@ -820,6 +1236,15 @@ function pickCurrent() {
 }
 
 function renderCurrent() {
+  buildModeSeg(document.getElementById("modeSegCurrent"));
+  const adminMode = ui.mode === "admin";
+  document.getElementById("currentAdmin").hidden = !adminMode;
+  document.getElementById("currentLinks").hidden = adminMode;
+  if (adminMode) renderCurrentAdmin();
+  else renderCurrentLinks(ui.mode);
+}
+
+function renderCurrentAdmin() {
   const card = document.getElementById("currentCard");
   const empty = document.getElementById("currentEmpty");
   const taskBtns = document.getElementById("currentBtns");
@@ -859,7 +1284,7 @@ function renderCurrent() {
       empty.textContent = "All clear for now 🎉 " + snoozed.length + " snoozed task" +
         (snoozed.length > 1 ? "s" : "") + " — next back at " + fmtWhen(next) + ".";
     } else {
-      empty.textContent = "Nothing to do 🎉 Add tasks on the Add Task page.";
+      empty.textContent = "Nothing to do 🎉 Add tasks on the Add page.";
     }
     return;
   }
@@ -952,12 +1377,220 @@ function reducePriority(id) {
   toast("Priority lowered to P" + item.priority);
 }
 
+// ---------- read / watch: selection, sorting, ordering ----------
+
+function visibleLinks(list) {
+  return state.links.items.filter(i => i.list === list && !i.removed);
+}
+
+function linkDateVal(i) {
+  return i.date ? new Date(i.date + "T00:00").getTime() : i.addedAt;
+}
+
+function orderIndex(list, id) {
+  const idx = state.links.order[list].indexOf(id);
+  return idx === -1 ? Infinity : idx;
+}
+
+function sortLinks(arr, list, sort) {
+  const cmpNew = (a, b) => (linkDateVal(b) - linkDateVal(a)) || (b.addedAt - a.addedAt);
+  arr.sort((a, b) => {
+    if (sort === "short" || sort === "long") {
+      const am = a.minutes, bm = b.minutes;
+      if (am == null && bm == null) return cmpNew(a, b);
+      if (am == null) return 1;
+      if (bm == null) return -1;
+      return (sort === "short" ? am - bm : bm - am) || cmpNew(a, b);
+    }
+    if (sort === "new") return cmpNew(a, b);
+    const ai = orderIndex(list, a.id), bi = orderIndex(list, b.id);
+    if (ai !== bi) return ai - bi;          // both Infinity → fall through to newest first
+    return cmpNew(a, b);
+  });
+  return arr;
+}
+
+function lenMatch(list, bucket, m) {
+  if (bucket === "any") return true;
+  if (m == null) return false;
+  const [lo, hi] = LEN_SPLIT[list];
+  if (bucket === "s") return m <= lo;
+  if (bucket === "m") return m > lo && m <= hi;
+  return m > hi;
+}
+
+function kindMatch(list, kf, item) {
+  if (kf === "all" || !kf) return true;
+  if (kf === "tweet") return item.kind === "Tweet";
+  if (kf === "article") return item.kind !== "Tweet";
+  return true;
+}
+
+function pendingLinks(list) {
+  return visibleLinks(list).filter(i => !i.done);
+}
+
+function filteredLinks(list) {
+  const arr = pendingLinks(list).filter(i => lenMatch(list, ui.len[list], i.minutes) && kindMatch(list, ui.kind[list], i));
+  return sortLinks(arr, list, ui.sort[list]);
+}
+
+// Write the current "My order" down explicitly (pending items only) so moves are well defined.
+function ensureOrder(list) {
+  const ids = sortLinks(pendingLinks(list), list, "order").map(i => i.id);
+  state.links.order[list] = ids;
+  return ids;
+}
+
+function moveLink(id, where) {
+  const item = linkById(id);
+  if (!item) return;
+  const ord = ensureOrder(item.list);
+  const i = ord.indexOf(id);
+  if (i === -1) return;
+  ord.splice(i, 1);
+  if (where === "top") ord.unshift(id);
+  else if (where === "bottom") ord.push(id);
+  else if (where === "up") ord.splice(Math.max(0, i - 1), 0, id);
+  else ord.splice(Math.min(ord.length, i + 1), 0, id);
+  markDirty();
+  render();
+}
+
+function buildLinkTools(container, list) {
+  container.innerHTML = "";
+  const sortRow = document.createElement("div");
+  sortRow.className = "chipRow";
+  buildChoiceChips(sortRow, SORTS, ui.sort[list], v => { ui.sort[list] = v; saveUi(); render(); });
+  container.appendChild(sortRow);
+  const lenRow = document.createElement("div");
+  lenRow.className = "chipRow";
+  buildChoiceChips(lenRow, LEN_BUCKETS[list], ui.len[list], v => { ui.len[list] = v; saveUi(); render(); });
+  container.appendChild(lenRow);
+  if (KIND_FILTERS[list].length > 0) {
+    const kindRow = document.createElement("div");
+    kindRow.className = "chipRow";
+    buildChoiceChips(kindRow, KIND_FILTERS[list], ui.kind[list], v => { ui.kind[list] = v; saveUi(); render(); });
+    container.appendChild(kindRow);
+  }
+}
+
+function linkMetaRow(item, withDate) {
+  const meta = document.createElement("div");
+  meta.className = "metaRow";
+  meta.appendChild(kindBadge(item.kind));
+  const bits = [];
+  if (item.source) bits.push(item.source);
+  bits.push(fmtMins(item.minutes));
+  if (withDate && item.date) bits.push(fmtShortDate(item.date));
+  const s = document.createElement("span");
+  s.className = "subNote";
+  s.textContent = bits.join(" · ");
+  meta.appendChild(s);
+  return meta;
+}
+
+function renderCurrentLinks(list) {
+  buildLinkTools(document.getElementById("curLinkTools"), list);
+  const pending = pendingLinks(list);
+  const shown = filteredLinks(list);
+  const verb = list === "read" ? "read" : "watch";
+
+  const known = shown.filter(i => i.minutes != null);
+  const total = known.reduce((s, i) => s + i.minutes, 0);
+  const summary = document.getElementById("curLinkSummary");
+  summary.textContent = pending.length === 0 ? "" :
+    (shown.length === pending.length ? shown.length : shown.length + " of " + pending.length) +
+    " to " + verb + (known.length ? " · " + fmtMins(total) + " in total" : "") +
+    (ui.sort[list] === "order" ? " · your order" : "");
+
+  const cards = document.getElementById("curLinkCards");
+  cards.innerHTML = "";
+  for (const item of shown) cards.appendChild(renderLinkCard(item));
+
+  const empty = document.getElementById("curLinkEmpty");
+  empty.hidden = shown.length > 0;
+  empty.textContent = pending.length === 0
+    ? "Nothing to " + verb + " 🎉 Email yourself a link, then import links.json on the List tab — or add one on the Add tab."
+    : "Nothing matches these filters.";
+}
+
+function renderLinkCard(item) {
+  const card = document.createElement("div");
+  card.className = "linkCard";
+  card.appendChild(linkMetaRow(item, true));
+
+  const title = document.createElement("button");
+  title.className = "title";
+  title.textContent = linkTitle(item);
+  title.onclick = () => openLinkDetail(item.id);
+  card.appendChild(title);
+
+  const blurbText = item.notes ? "📝 " + item.notes : item.summary;
+  if (blurbText && blurbText.trim() !== item.title.trim()) {
+    const blurb = document.createElement("div");
+    blurb.className = "blurb";
+    blurb.textContent = blurbText;
+    blurb.onclick = () => openLinkDetail(item.id);
+    card.appendChild(blurb);
+  }
+
+  const btns = document.createElement("div");
+  btns.className = "btns";
+  const open = document.createElement("a");
+  open.className = "open";
+  open.href = item.url;
+  open.target = "_blank";
+  open.rel = "noopener";
+  open.textContent = "Open ↗";
+  const done = document.createElement("button");
+  done.textContent = "✓ Done";
+  done.onclick = () => completeLink(item.id);
+  const later = document.createElement("button");
+  later.className = "later";
+  later.textContent = "Later ⤓";
+  later.onclick = () => { moveLink(item.id, "bottom"); toast("Moved to the bottom of your order."); };
+  btns.append(open, done, later);
+  card.appendChild(btns);
+  return card;
+}
+
+function completeLink(id) {
+  const item = linkById(id);
+  if (!item) return;
+  item.done = true;
+  item.completedAt = Date.now();
+  markDirty();
+  render();
+  toast("Done: " + linkTitle(item));
+}
+
+function toggleLink(id) {
+  const item = linkById(id);
+  if (!item) return;
+  item.done = !item.done;
+  item.completedAt = item.done ? Date.now() : null;
+  markDirty();
+  render();
+}
+
 // ---------- list page ----------
 
 const activeList = document.getElementById("activeList");
 const doneList = document.getElementById("doneList");
+const linkActiveList = document.getElementById("linkActiveList");
+const linkDoneList = document.getElementById("linkDoneList");
 
 function renderList() {
+  buildModeSeg(document.getElementById("modeSegList"));
+  const adminMode = ui.mode === "admin";
+  document.getElementById("listAdmin").hidden = !adminMode;
+  document.getElementById("listLinks").hidden = adminMode;
+  if (adminMode) renderListAdmin();
+  else renderListLinks(ui.mode);
+}
+
+function renderListAdmin() {
   buildFilterChips();
   activeList.innerHTML = "";
   doneList.innerHTML = "";
@@ -975,7 +1608,7 @@ function renderList() {
   emptyMsg.hidden = active.length > 0;
   emptyMsg.textContent = filterTag
     ? "No active “" + filterTag + "” tasks."
-    : "Nothing to do — add tasks on the Add Task page.";
+    : "Nothing to do — add tasks on the Add page.";
   document.getElementById("doneCount").textContent = done.length;
   document.getElementById("doneHeader").classList.toggle("show", done.length > 0);
   document.getElementById("clearDoneBtn").classList.toggle("show",
@@ -1059,7 +1692,90 @@ function toggle(id) {
   render();
 }
 
+function renderListLinks(list) {
+  const status = document.getElementById("linkStatus");
+  const n = visibleLinks(list).length;
+  status.textContent = (state.links.importedAt ? "Links updated " + fmtWhen(state.links.importedAt) : "No links imported yet") +
+    " · " + n + " " + (list === "read" ? "to read" : "to watch");
+  document.getElementById("linkRefreshBtn").hidden = !ui.syncUrl;
+
+  buildLinkTools(document.getElementById("listLinkTools"), list);
+  linkActiveList.innerHTML = "";
+  linkDoneList.innerHTML = "";
+
+  const active = filteredLinks(list);
+  const done = visibleLinks(list).filter(i => i.done);
+  done.sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0));
+  const showOrder = ui.sort[list] === "order";
+
+  active.forEach((item, idx) => linkActiveList.appendChild(renderLinkRow(item, showOrder, idx, active.length)));
+  for (const item of done) linkDoneList.appendChild(renderLinkRow(item, false, 0, 0));
+
+  const emptyMsg = document.getElementById("linkEmptyMsg");
+  emptyMsg.hidden = active.length > 0;
+  emptyMsg.textContent = pendingLinks(list).length === 0
+    ? "Nothing here yet. Import links.json (button above) or add a link on the Add tab."
+    : "Nothing matches these filters.";
+  document.getElementById("linkDoneCount").textContent = done.length;
+  document.getElementById("linkDoneHeader").classList.toggle("show", done.length > 0);
+  document.getElementById("linkClearDoneBtn").classList.toggle("show",
+    done.length > 0 && !linkDoneList.classList.contains("collapsed"));
+}
+
+function renderLinkRow(item, showOrder, idx, count) {
+  const li = document.createElement("li");
+  li.className = "item" + (item.done ? " done" : "");
+
+  const check = document.createElement("button");
+  check.className = "check";
+  check.setAttribute("aria-label", item.done ? "Mark as not done" : "Mark as done");
+  check.textContent = "✓";
+  check.onclick = () => toggleLink(item.id);
+
+  const mid = document.createElement("div");
+  mid.className = "mid";
+  const name = document.createElement("button");
+  name.className = "name";
+  name.textContent = linkTitle(item);
+  name.onclick = () => openLinkDetail(item.id);
+  mid.appendChild(name);
+  mid.appendChild(linkMetaRow(item, false));
+
+  li.append(check, mid);
+
+  if (showOrder) {
+    const btns = document.createElement("div");
+    btns.className = "orderBtns";
+    const mk = (label, where, disabled) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.textContent = label;
+      b.disabled = disabled;
+      b.setAttribute("aria-label", "Move " + where);
+      b.onclick = () => moveLink(item.id, where);
+      return b;
+    };
+    btns.append(mk("⤒", "top", idx === 0), mk("▲", "up", idx === 0), mk("▼", "down", idx >= count - 1));
+    li.appendChild(btns);
+  } else {
+    const mins = document.createElement("span");
+    mins.className = "mins";
+    mins.textContent = fmtMins(item.minutes);
+    li.appendChild(mins);
+  }
+  return li;
+}
+
 // ---------- add page ----------
+
+function renderAdd() {
+  document.getElementById("addKindTask").classList.toggle("on", addKind === "task");
+  document.getElementById("addKindLink").classList.toggle("on", addKind === "link");
+  document.getElementById("addBox").hidden = addKind !== "task";
+  document.getElementById("addLinkBox").hidden = addKind !== "link";
+  buildChoiceChips(document.getElementById("newLinkList"), [["read", "Read"], ["watch", "Watch"]], addLinkList,
+    v => { addLinkList = v; renderAdd(); });
+}
 
 function addItem() {
   const nameInput = document.getElementById("newItem");
@@ -1089,7 +1805,80 @@ function addItem() {
   nameInput.focus();
 }
 
-// ---------- detail sheet ----------
+function addLink() {
+  const urlEl = document.getElementById("newUrl");
+  let url = urlEl.value.trim();
+  if (url && !/^https?:\/\//i.test(url)) url = "https://" + url;
+  let parsed;
+  try { parsed = new URL(url); } catch (e) { toast("That doesn't look like a link."); return; }
+  if (!parsed.hostname.includes(".")) { toast("That doesn't look like a link."); return; }
+
+  const id = linkId(url);
+  const existing = linkById(id);
+  const title = document.getElementById("newLinkTitle").value.trim();
+  const minsRaw = parseFloat(document.getElementById("newLinkMin").value);
+  const minutes = isFinite(minsRaw) && minsRaw >= 0 ? minsRaw : null;
+  const notes = document.getElementById("newLinkNotes").value.trim();
+
+  if (existing) {
+    if (existing.removed || existing.done) {
+      existing.removed = false;
+      existing.done = false;
+      existing.completedAt = null;
+      if (notes) existing.notes = notes;
+      markDirty();
+      render();
+      toast("Already saved — moved back to your " + existing.list + " list.");
+    } else {
+      toast("That link is already in your " + existing.list + " list.");
+    }
+    return;
+  }
+
+  const item = normalizeLink({
+    id, url, kind: guessKind(url), list: addLinkList, listUser: true,
+    title, source: hostOf(parsed), minutes, notes, manual: true,
+    date: new Date().toISOString().slice(0, 10),
+  });
+  state.links.items.push(item);
+  urlEl.value = "";
+  document.getElementById("newLinkTitle").value = "";
+  document.getElementById("newLinkMin").value = "";
+  document.getElementById("newLinkNotes").value = "";
+  markDirty();
+  render();
+  toast("Added to your " + addLinkList + " list.");
+  if (!item.title) fetchLinkTitle(item.id);
+}
+
+// Best-effort title lookup for links added on the phone (noembed.com covers YouTube, X, Vimeo and more).
+async function fetchLinkTitle(id) {
+  const item = linkById(id);
+  if (!item || item.title) return;
+  try {
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    const res = await fetch("https://noembed.com/embed?url=" + encodeURIComponent(item.url), { signal: ctrl.signal });
+    clearTimeout(timer);
+    const j = await res.json();
+    const fresh = linkById(id);
+    if (!fresh || fresh.title) return;
+    if (typeof j.title === "string" && j.title) {
+      fresh.title = j.title;
+      if (typeof j.author_name === "string" && j.author_name) fresh.source = j.author_name;
+      save();
+      render();
+    }
+  } catch (e) { /* offline or unsupported site — the link shows its address instead */ }
+}
+
+// ---------- detail sheets ----------
+
+function showSheet(which) {
+  document.getElementById("detailSheet").hidden = which !== "task";
+  document.getElementById("linkSheet").hidden = which !== "link";
+  document.getElementById("overlay").classList.add("show");
+}
 
 function openDetail(id) {
   const item = byId(id);
@@ -1124,11 +1913,12 @@ function openDetail(id) {
   }
 
   document.getElementById("dMeta").textContent = "Created " + new Date(item.createdAt).toLocaleDateString();
-  document.getElementById("overlay").classList.add("show");
+  showSheet("task");
 }
 
 function closeDetail() {
   editingId = null;
+  editingLinkId = null;
   document.getElementById("overlay").classList.remove("show");
 }
 
@@ -1161,10 +1951,168 @@ function deleteDetail() {
   toast("Deleted.");
 }
 
+function openLinkDetail(id) {
+  const item = linkById(id);
+  if (!item) return;
+  editingLinkId = id;
+  editLinkList = item.list;
+
+  const meta = document.getElementById("lMeta");
+  meta.innerHTML = "";
+  meta.append(...linkMetaRow(item, true).children);
+  const open = document.getElementById("lOpen");
+  open.href = item.url;
+  document.getElementById("lTitle").value = item.title;
+  const listChips = document.getElementById("lList");
+  const pickList = v => { editLinkList = v; buildChoiceChips(listChips, [["read", "Read"], ["watch", "Watch"]], v, pickList); };
+  buildChoiceChips(listChips, [["read", "Read"], ["watch", "Watch"]], editLinkList, pickList);
+  document.getElementById("lMinutes").value = item.minutes == null ? "" : item.minutes;
+  const sum = document.getElementById("lSummary");
+  sum.textContent = item.summary || "(no summary)";
+  document.getElementById("lNotes").value = item.notes;
+
+  const doneRow = document.getElementById("lDoneRow");
+  if (item.done) {
+    document.getElementById("lDoneMsg").textContent = "Completed " +
+      (item.completedAt ? new Date(item.completedAt).toLocaleDateString() : "");
+    doneRow.classList.add("show");
+  } else {
+    doneRow.classList.remove("show");
+  }
+  document.getElementById("lTop").hidden = item.done;
+  document.getElementById("lBottom").hidden = item.done;
+  document.getElementById("lDone").hidden = item.done;
+
+  document.getElementById("lMetaFoot").textContent =
+    (item.date ? "Saved " + fmtShortDate(item.date) + " · " : "") + (item.manual ? "Added on this phone · " : "") + item.url;
+  showSheet("link");
+}
+
+function saveLinkDetail() {
+  const item = linkById(editingLinkId);
+  if (!item) { closeDetail(); return; }
+  item.title = document.getElementById("lTitle").value.trim();
+  const minsRaw = parseFloat(document.getElementById("lMinutes").value);
+  item.minutes = isFinite(minsRaw) && minsRaw >= 0 ? minsRaw : null;
+  item.notes = document.getElementById("lNotes").value.trim();
+  if (item.list !== editLinkList) {
+    state.links.order[item.list] = state.links.order[item.list].filter(x => x !== item.id);
+    item.list = editLinkList;
+    item.listUser = true;
+  }
+  markDirty();
+  closeDetail();
+  render();
+  toast("Saved.");
+}
+
+function removeLinkDetail() {
+  const item = linkById(editingLinkId);
+  if (!item) { closeDetail(); return; }
+  if (!confirm("Remove “" + linkTitle(item) + "” from your " + item.list + " list?")) return;
+  // Keep a hidden record so a later import doesn't bring it straight back.
+  item.removed = true;
+  for (const l of LISTS) state.links.order[l] = state.links.order[l].filter(x => x !== item.id);
+  markDirty();
+  closeDetail();
+  render();
+  toast("Removed.");
+}
+
+// ---------- links.json import / sync ----------
+
+function summarizeImport(r) {
+  const parts = [];
+  if (r.added) parts.push(r.added + " new");
+  if (r.pruned) parts.push(r.pruned + " gone from Gmail");
+  return "Links updated" + (parts.length ? ": " + parts.join(", ") : " — nothing new") + ".";
+}
+
+// Merge a links.json catalogue into the phone's lists. Your done / notes / order / removed
+// flags win; the file wins on title, source, length and summary. Non-manual links that are
+// no longer in the file (archived in Gmail) are dropped.
+function importCatalog(cat) {
+  if (!cat || cat.app !== LINKS_APP || !Array.isArray(cat.items)) return { ok: false };
+  const local = new Map(state.links.items.map(i => [i.id, i]));
+  const seen = new Set();
+  let added = 0;
+  for (const raw of cat.items) {
+    if (!raw || typeof raw !== "object") continue;
+    const inc = normalizeLink(raw);
+    if (!inc.url) continue;
+    seen.add(inc.id);
+    const cur = local.get(inc.id);
+    if (cur) {
+      cur.url = inc.url;
+      cur.kind = inc.kind;
+      if (inc.title) cur.title = inc.title;
+      if (inc.source) cur.source = inc.source;
+      if (inc.minutes != null) cur.minutes = inc.minutes;
+      if (inc.summary) cur.summary = inc.summary;
+      if (inc.date) cur.date = inc.date;
+      if (!cur.listUser) cur.list = inc.list;
+      cur.manual = false;
+    } else {
+      inc.manual = false;
+      inc.addedAt = Date.now();
+      state.links.items.push(inc);
+      local.set(inc.id, inc);
+      added++;
+    }
+  }
+  let pruned = 0;
+  if (seen.size > 0) {
+    const before = state.links.items.length;
+    state.links.items = state.links.items.filter(i => i.manual || seen.has(i.id));
+    pruned = before - state.links.items.length;
+  }
+  const keep = new Set(state.links.items.map(i => i.id));
+  for (const l of LISTS) state.links.order[l] = state.links.order[l].filter(id => keep.has(id));
+  state.links.catalogAt = typeof cat.generated === "string" ? cat.generated : null;
+  state.links.importedAt = Date.now();
+  save();
+  render();
+  return { ok: true, added, pruned, count: seen.size };
+}
+
+function importLinksText(text) {
+  let parsed;
+  try { parsed = JSON.parse(text); } catch (e) { toast("That file isn't a links.json."); return; }
+  if (parsed && parsed.app === "todo" && Array.isArray(parsed.items)) {
+    toast("That's a task backup — use Restore in Backup & restore instead.");
+    return;
+  }
+  const r = importCatalog(parsed);
+  if (!r.ok) { toast("That file isn't a links.json."); return; }
+  if (ui.mode === "admin") { ui.mode = "read"; saveUi(); render(); }
+  toast(summarizeImport(r));
+}
+
+async function fetchCatalog(manual) {
+  const url = ui.syncUrl;
+  if (!url) { if (manual) toast("No sync URL set — use Import file… instead."); return; }
+  try {
+    const res = await fetch(url + (url.includes("?") ? "&" : "?") + "_=" + Date.now(), { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const cat = await res.json();
+    ui.lastSyncAt = Date.now();
+    saveUi();
+    const r = importCatalog(cat);
+    if (!r.ok) { if (manual) toast("That URL didn't return a links.json."); return; }
+    if (manual || r.added || r.pruned) toast(summarizeImport(r));
+  } catch (e) {
+    if (manual) toast("Couldn't fetch links: " + e.message);
+  }
+}
+
+function maybeAutoSync() {
+  if (ui.syncUrl && (!ui.lastSyncAt || Date.now() - ui.lastSyncAt > SYNC_STALE_MS)) fetchCatalog(false);
+}
+
 // ---------- backup / restore ----------
 
 function backupPayload() {
-  return JSON.stringify({ app: "todo", version: 4, exportedAt: new Date().toISOString(), items: state.items });
+  return JSON.stringify({ app: "todo", version: 5, exportedAt: new Date().toISOString(), items: state.items, links: state.links });
 }
 
 function backupDone() {
@@ -1220,6 +2168,13 @@ function restoreFromText(text, merge) {
     toast("That doesn't look like a valid backup.");
     return;
   }
+  // A links.json dropped here is handled as a links import rather than rejected.
+  if (parsed && parsed.app === LINKS_APP && Array.isArray(parsed.items)) {
+    const r = importCatalog(parsed);
+    document.getElementById("restoreText").value = "";
+    toast(r.ok ? summarizeImport(r) : "That doesn't look like a valid links file.");
+    return;
+  }
   const items = Array.isArray(parsed) ? parsed : parsed.items;
   if (!Array.isArray(items) || !items.every(i => i && (typeof i.name === "string" || typeof i.text === "string"))) {
     toast("That doesn't look like a valid backup.");
@@ -1240,9 +2195,12 @@ function restoreFromText(text, merge) {
     return;
   }
 
-  const ok = confirm("Replace your current list (" + state.items.length + " items) with the backup (" + items.length + " items)?");
+  const hasLinks = !Array.isArray(parsed) && parsed.links && typeof parsed.links === "object";
+  const ok = confirm("Replace your current list (" + state.items.length + " items) with the backup (" + items.length + " items" +
+    (hasLinks ? ", plus its Read/Watch links" : "") + ")?");
   if (!ok) return;
   state.items = incoming;
+  if (hasLinks) state.links = normalizeLinks(parsed.links);
   markDirty();
   render();
   document.getElementById("restoreText").value = "";
@@ -1260,8 +2218,8 @@ function renderBackupInfo() {
   }
 
   const banner = document.getElementById("backupBanner");
-  // The Current tab shows the backup pseudo-task instead, so no banner there.
-  const showBanner = backupOverdue() && activeTab !== "current";
+  // The Current tab's Admin view shows the backup pseudo-task instead, so no banner there.
+  const showBanner = backupOverdue() && !(activeTab === "current" && ui.mode === "admin");
   if (showBanner) {
     document.getElementById("backupBannerMsg").textContent = state.lastBackupAt
       ? "Last backup was " + Math.floor((Date.now() - state.lastBackupAt) / DAY) + "+ days ago and you have new changes."
@@ -1272,7 +2230,7 @@ function renderBackupInfo() {
 
 // ---------- tabs / render ----------
 
-const TAB_TITLES = { current: "Current", list: "List", add: "Add Task" };
+const TAB_TITLES = { current: "Current", list: "List", add: "Add" };
 
 function setTab(tab) {
   activeTab = tab;
@@ -1283,12 +2241,18 @@ function setTab(tab) {
   document.getElementById("tabList").classList.toggle("on", tab === "list");
   document.getElementById("tabAdd").classList.toggle("on", tab === "add");
   document.getElementById("pageTitle").textContent = TAB_TITLES[tab];
+  if (tab === "add") {
+    // Follow whichever mode you're in: Admin → task form, Read/Watch → link form for that list.
+    addKind = ui.mode === "admin" ? "task" : "link";
+    if (ui.mode !== "admin") addLinkList = ui.mode;
+  }
   render();
 }
 
 function render() {
   if (activeTab === "current") renderCurrent();
   if (activeTab === "list") renderList();
+  if (activeTab === "add") renderAdd();
   renderBackupInfo();
 }
 
@@ -1303,9 +2267,28 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove("show"), 3000);
 }
 
+function readFileInto(inputEl, handler) {
+  inputEl.addEventListener("change", e => {
+    const f = e.target.files[0];
+    if (!f) return;
+    const reader = new FileReader();
+    reader.onload = () => handler(String(reader.result));
+    reader.readAsText(f);
+    e.target.value = "";
+  });
+}
+
 // ---------- wire up ----------
 
 document.getElementById("addSubmit").onclick = addItem;
+document.getElementById("addLinkSubmit").onclick = addLink;
+document.getElementById("addKindTask").onclick = () => { addKind = "task"; renderAdd(); };
+document.getElementById("addKindLink").onclick = () => { addKind = "link"; renderAdd(); };
+document.getElementById("newUrl").addEventListener("change", () => {
+  // Typing a YouTube link flips the default list to Watch (you can still change it).
+  const v = document.getElementById("newUrl").value.trim();
+  if (v && guessKind(/^https?:\/\//i.test(v) ? v : "https://" + v) === "Video") { addLinkList = "watch"; renderAdd(); }
+});
 buildPrioPicker(document.getElementById("addPrio"), () => addPriority, p => { addPriority = p; });
 initBdayControls("add");
 initBdayControls("d");
@@ -1322,10 +2305,20 @@ document.getElementById("clearDoneBtn").onclick = () => {
   markDirty();
   render();
 };
+document.getElementById("linkDoneHeader").onclick = () => { linkDoneList.classList.toggle("collapsed"); renderList(); };
+document.getElementById("linkClearDoneBtn").onclick = () => {
+  const done = visibleLinks(ui.mode).filter(i => i.done);
+  if (done.length === 0) return;
+  if (!confirm("Clear all " + done.length + " completed links from this list?")) return;
+  for (const i of done) i.removed = true;   // hidden for good; an import won't bring them back
+  markDirty();
+  render();
+};
 document.getElementById("toolsToggle").onclick = () => {
   const tools = document.getElementById("tools");
   tools.classList.toggle("show");
   if (tools.classList.contains("show")) {
+    document.getElementById("syncUrl").value = ui.syncUrl;
     setTimeout(() => tools.scrollIntoView({ behavior: "smooth", block: "start" }), 60);
   }
 };
@@ -1335,19 +2328,29 @@ document.getElementById("downloadBackupBtn").onclick = downloadBackup;
 document.getElementById("restoreBtn").onclick = () => restoreFromText(document.getElementById("restoreText").value, false);
 document.getElementById("importBtn").onclick = () => restoreFromText(document.getElementById("restoreText").value, true);
 document.getElementById("restoreFileBtn").onclick = () => document.getElementById("restoreFile").click();
-document.getElementById("restoreFile").addEventListener("change", e => {
-  const f = e.target.files[0];
-  if (!f) return;
-  const reader = new FileReader();
-  reader.onload = () => restoreFromText(String(reader.result));
-  reader.readAsText(f);
-  e.target.value = "";
-});
+readFileInto(document.getElementById("restoreFile"), text => restoreFromText(text, false));
+
+document.getElementById("linkImportBtn").onclick = () => document.getElementById("linkFile").click();
+document.getElementById("linkImportBtn2").onclick = () => document.getElementById("linkFile").click();
+readFileInto(document.getElementById("linkFile"), importLinksText);
+document.getElementById("linkRefreshBtn").onclick = () => fetchCatalog(true);
+document.getElementById("syncNowBtn").onclick = () => {
+  ui.syncUrl = document.getElementById("syncUrl").value.trim();
+  saveUi();
+  fetchCatalog(true);
+};
+document.getElementById("syncSaveBtn").onclick = () => {
+  ui.syncUrl = document.getElementById("syncUrl").value.trim();
+  ui.lastSyncAt = null;
+  saveUi();
+  render();
+  toast(ui.syncUrl ? "Sync URL saved — links refresh when the app opens." : "Sync URL cleared.");
+};
 
 document.getElementById("tabCurrent").onclick = () => setTab("current");
 document.getElementById("tabList").onclick = () => setTab("list");
 document.getElementById("tabAdd").onclick = () => setTab("add");
-document.getElementById("closeSheet").onclick = closeDetail;
+for (const b of document.querySelectorAll(".closeSheet")) b.onclick = closeDetail;
 document.getElementById("overlay").addEventListener("click", e => { if (e.target === e.currentTarget) closeDetail(); });
 document.getElementById("dSave").onclick = saveDetail;
 document.getElementById("dDelete").onclick = deleteDetail;
@@ -1370,15 +2373,31 @@ document.getElementById("dUncomplete").onclick = () => {
   render();
   toast("Moved back to your list.");
 };
+document.getElementById("lSave").onclick = saveLinkDetail;
+document.getElementById("lRemove").onclick = removeLinkDetail;
+document.getElementById("lTop").onclick = () => { const id = editingLinkId; closeDetail(); moveLink(id, "top"); toast("Moved to the top."); };
+document.getElementById("lBottom").onclick = () => { const id = editingLinkId; closeDetail(); moveLink(id, "bottom"); toast("Moved to the bottom."); };
+document.getElementById("lDone").onclick = () => { const id = editingLinkId; closeDetail(); completeLink(id); };
+document.getElementById("lUncomplete").onclick = () => {
+  const item = linkById(editingLinkId);
+  if (!item) return;
+  item.done = false;
+  item.completedAt = null;
+  markDirty();
+  closeDetail();
+  render();
+  toast("Moved back to your " + item.list + " list.");
+};
 
 document.getElementById("dateLabel").textContent =
   new Date().toLocaleDateString(undefined, { weekday: "short", day: "numeric", month: "short" });
 
 // Re-check snoozes and P10 dates when the app comes back to the foreground, and once a minute.
-document.addEventListener("visibilitychange", () => { if (!document.hidden) render(); });
+document.addEventListener("visibilitychange", () => { if (!document.hidden) { render(); maybeAutoSync(); } });
 setInterval(render, 60 * 1000);
 
 setTab("current");
+maybeAutoSync();
 
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.register("sw.js");

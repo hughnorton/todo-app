@@ -1,7 +1,7 @@
 "use strict";
 
 // Bump this version whenever any app file changes, so phones pick up the update.
-const CACHE = "todo-v7";
+const CACHE = "todo-v8";
 const ASSETS = ["index.html", "manifest.webmanifest", "icon-180.png", "icon-192.png", "icon-512.png"];
 
 self.addEventListener("install", e => {
@@ -17,8 +17,11 @@ self.addEventListener("activate", e => {
 });
 
 // Network-first so updates arrive when online; cached copy keeps the app working offline.
+// Only the app's own files are handled — cross-origin requests (title lookups, a links
+// sync URL) go straight to the network untouched.
 self.addEventListener("fetch", e => {
   if (e.request.method !== "GET") return;
+  if (new URL(e.request.url).origin !== self.location.origin) return;
   e.respondWith(
     fetch(e.request)
       .then(res => {

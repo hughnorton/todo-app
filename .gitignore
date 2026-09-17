@@ -1,0 +1,4 @@
+# Personal data — never publish to the public repo
+links.json
+todo-backup-*.json
+.claude/
