@@ -52,9 +52,13 @@ video → Watch), fed by the Gmail link tracker on Hugh's PC
 - Import paths: "Import file…" on the List tab (Read/Watch) or in the tools panel
   (`#linkFile` → iOS Files → OneDrive → To Do → links.json), or an optional **sync URL**
   (`ui.syncUrl`, fetched with `cache: "no-store"` on open / foreground when older than
-  30 min, plus "Refresh"). No URL is set by default — hosting links.json anywhere
-  public would publish Hugh's reading list, so that is Hugh's call (a secret Gist raw
-  URL was the suggested option). `links.json` is in `.gitignore`.
+  30 min, plus "Refresh"). **Hugh decided (2026-09-17) to keep everything on-device:
+  no sync URL, nothing hosted** — leave the field unset and don't re-suggest hosting.
+  `links.json` is in `.gitignore`.
+- Tweets that link out: the PC script files a tweet under Watch when it links to a video
+  (with that video's length) and under Read with the linked page's reading time otherwise;
+  the tweet keeps its own URL/identity, so nothing duplicates on the phone. The
+  spreadsheet's "List" column is what `links.json` carries as `list`.
 - **Current (Read/Watch)**: sort chips (My order / Shortest / Longest / Newest),
   length-bucket chips (Read: ≤5 / 5–15 / 15+ min; Watch: ≤15 / 15–45 / 45+), Read
   also has Articles / Tweets chips. A one-line summary ("12 to watch · 11h 22m in
