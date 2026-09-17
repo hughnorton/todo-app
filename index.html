@@ -616,7 +616,7 @@
       <input id="restoreFile" type="file" accept=".json,.txt,application/json,text/plain" hidden>
     </div>
     <h2>Read / Watch links</h2>
-    <p class="hint">The PC refresh writes a <b>links.json</b> file (OneDrive → Documents → Miscellaneous → To Do). Import it here to update the Read and Watch lists. Optionally set a sync URL and the app fetches it by itself when opened.</p>
+    <p class="hint">The PC refresh writes a <b>links.json</b> file (OneDrive → Documents → Miscellaneous → To Do). Import it here: only links this phone hasn't seen are added, and anything you've marked done or removed stays that way — so it's safe to archive the emails afterwards. Optionally set a sync URL and the app fetches it by itself when opened.</p>
     <div class="btnRow">
       <button class="action" id="linkImportBtn2">Import links.json…</button>
     </div>
@@ -857,10 +857,10 @@ function normalizeLink(l) {
     summary: typeof l.summary === "string" ? l.summary : "",
     date: (typeof l.date === "string" && /^\d{4}-\d{2}-\d{2}/.test(l.date)) ? l.date.slice(0, 10) : null,
     addedAt: typeof l.addedAt === "number" ? l.addedAt : Date.now(),
-    manual: !!l.manual,                           // added on the phone (never pruned by an import)
+    manual: !!l.manual,                           // added on this phone rather than via links.json
     done: !!l.done,
     completedAt: l.completedAt || null,
-    removed: !!l.removed,                         // hidden for good, even if an import brings it back
+    removed: !!l.removed,                         // hidden for good; imports never un-hide it
     notes: typeof l.notes === "string" ? l.notes : "",
   };
 }
@@ -2022,25 +2022,22 @@ function removeLinkDetail() {
 // ---------- links.json import / sync ----------
 
 function summarizeImport(r) {
-  const parts = [];
-  if (r.added) parts.push(r.added + " new");
-  if (r.pruned) parts.push(r.pruned + " gone from Gmail");
-  return "Links updated" + (parts.length ? ": " + parts.join(", ") : " — nothing new") + ".";
+  return "Links updated" + (r.added ? ": " + r.added + " new" : " — nothing new") + ".";
 }
 
-// Merge a links.json catalogue into the phone's lists. Your done / notes / order / removed
-// flags win; the file wins on title, source, length and summary. Non-manual links that are
-// no longer in the file (archived in Gmail) are dropped.
+// Merge a links.json catalogue into the phone's lists. The phone is the master copy:
+// links already here keep their done / notes / order / removed state (the file only
+// refreshes title, source, length and summary), links it hasn't seen are added, and
+// nothing is ever deleted by an import — so archiving the emails in Gmail afterwards is safe.
 function importCatalog(cat) {
   if (!cat || cat.app !== LINKS_APP || !Array.isArray(cat.items)) return { ok: false };
   const local = new Map(state.links.items.map(i => [i.id, i]));
-  const seen = new Set();
-  let added = 0;
+  let added = 0, count = 0;
   for (const raw of cat.items) {
     if (!raw || typeof raw !== "object") continue;
     const inc = normalizeLink(raw);
     if (!inc.url) continue;
-    seen.add(inc.id);
+    count++;
     const cur = local.get(inc.id);
     if (cur) {
       cur.url = inc.url;
@@ -2060,19 +2057,11 @@ function importCatalog(cat) {
       added++;
     }
   }
-  let pruned = 0;
-  if (seen.size > 0) {
-    const before = state.links.items.length;
-    state.links.items = state.links.items.filter(i => i.manual || seen.has(i.id));
-    pruned = before - state.links.items.length;
-  }
-  const keep = new Set(state.links.items.map(i => i.id));
-  for (const l of LISTS) state.links.order[l] = state.links.order[l].filter(id => keep.has(id));
   state.links.catalogAt = typeof cat.generated === "string" ? cat.generated : null;
   state.links.importedAt = Date.now();
   save();
   render();
-  return { ok: true, added, pruned, count: seen.size };
+  return { ok: true, added, count };
 }
 
 function importLinksText(text) {
@@ -2099,7 +2088,7 @@ async function fetchCatalog(manual) {
     saveUi();
     const r = importCatalog(cat);
     if (!r.ok) { if (manual) toast("That URL didn't return a links.json."); return; }
-    if (manual || r.added || r.pruned) toast(summarizeImport(r));
+    if (manual || r.added) toast(summarizeImport(r));
   } catch (e) {
     if (manual) toast("Couldn't fetch links: " + e.message);
   }

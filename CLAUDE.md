@@ -37,12 +37,16 @@ video → Watch), fed by the Gmail link tracker on Hugh's PC
   `url:host/path?sorted-query` with tracking params stripped). It mirrors `link_id()` in
   `Gmail_Enhance.py` — **keep the two in sync** so a link added on the phone and the
   same link emailed later merge into one item.
-- **Import** (`importCatalog`): the phone's `done / notes / order / removed / listUser`
-  win; the file wins on title, source, minutes, summary. Non-manual links missing from
-  the file are pruned (Hugh archived the email). `removed` links stay as hidden records
-  so an import can't resurrect them. `manual` links (added on the phone) are never
-  pruned; when the same link later arrives from Gmail it is upgraded in place.
-  A links.json pasted/chosen in the task *Restore* box is also routed to `importCatalog`.
+- **The phone is the master list; Gmail is a temporary holding place.** Hugh's routine:
+  email links → PC refresh → import links.json on the phone → archive the emails. So
+  **`importCatalog` never deletes anything**: the phone's `done / notes / order / removed /
+  listUser` win, the file only refreshes title, source, minutes, summary, and links the
+  phone hasn't seen are added. links.json contains every link ever seen (archived rows
+  included) and done/`removed` links stay as hidden records so a re-import can't make
+  them "new" again. `manual` = added on the phone; when the same link later arrives from
+  Gmail it is upgraded in place. A links.json pasted/chosen in the task *Restore* box is
+  also routed to `importCatalog`. (An earlier version pruned links missing from the file —
+  Hugh explicitly did not want that.)
 - Import paths: "Import file…" on the List tab (Read/Watch) or in the tools panel
   (`#linkFile` → iOS Files → OneDrive → To Do → links.json), or an optional **sync URL**
   (`ui.syncUrl`, fetched with `cache: "no-store"` on open / foreground when older than
@@ -112,7 +116,7 @@ video → Watch), fed by the Gmail link tracker on Hugh's PC
 
 1. Edit files locally (this folder is the repo).
 2. **Always bump `CACHE` in `sw.js`** (`todo-vN`) with any change, or phones keep
-   the stale cached version. Currently `todo-v8`. The SW only handles same-origin
+   the stale cached version. Currently `todo-v9`. The SW only handles same-origin
    GETs (cross-origin lookups / sync URL bypass it).
 3. Smoke check: `run_test.py` pattern — copy `index.html` + `links.json` to a scratch
    folder, append a `<script>` that drives the functions and writes results into a
