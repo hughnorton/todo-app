@@ -55,6 +55,11 @@ video → Watch), fed by the Gmail link tracker on Hugh's PC
   30 min, plus "Refresh"). **Hugh decided (2026-09-17) to keep everything on-device:
   no sync URL, nothing hosted** — leave the field unset and don't re-suggest hosting.
   `links.json` is in `.gitignore`.
+- `linkMetaRow()` builds the "source · length · date" line out of separate `<span>`s so
+  pieces can be styled: a Tweet's source (the tweeter's name) gets `.tweetName`
+  (1.3em, `--tweetName` purple) and the length always gets `.dur` (`--dur` blue, bold,
+  matching the right-hand `.mins` on list rows). Anything copying that row must move
+  `childNodes`, not `children` — the " · " separators are text nodes.
 - Tweets that link out: the PC script files a tweet under Watch when it links to a video
   (with that video's length) and under Read with the linked page's reading time otherwise;
   the tweet keeps its own URL/identity, so nothing duplicates on the phone. The

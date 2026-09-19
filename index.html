@@ -30,6 +30,8 @@
     --pHigh: #ea770b;
     --pMid: #4f46e5;
     --pLow: #8a8aa0;
+    --tweetName: #7c3aed;
+    --dur: #1d4ed8;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -48,6 +50,8 @@
       --pHigh: #fb923c;
       --pMid: #7c74ff;
       --pLow: #9a9ab0;
+      --tweetName: #c084fc;
+      --dur: #7aa8ff;
     }
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -133,6 +137,9 @@
     font-weight: 600;
   }
   .subNote { color: var(--muted); font-size: 0.75rem; }
+  /* Read / Watch meta line: tweeter's name stands out, duration is the blue bold bit. */
+  .subNote .tweetName { font-size: 1.3em; color: var(--tweetName); }
+  .subNote .dur { color: var(--dur); font-weight: 700; }
   .metaRow { display: flex; flex-wrap: wrap; gap: 4px 8px; align-items: center; }
   p.hint { color: var(--muted); font-size: 0.82rem; line-height: 1.45; }
 
@@ -329,7 +336,7 @@
     line-height: 1;
   }
   li.item .orderBtns button:disabled { opacity: 0.3; }
-  li.item .mins { color: var(--muted); font-size: 0.8rem; font-weight: 700; flex-shrink: 0; min-width: 44px; text-align: right; }
+  li.item .mins { color: var(--dur); font-size: 0.8rem; font-weight: 700; flex-shrink: 0; min-width: 44px; text-align: right; }
 
   /* ---------- add page ---------- */
   #addBox, #addLinkBox { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
@@ -1481,13 +1488,19 @@ function linkMetaRow(item, withDate) {
   const meta = document.createElement("div");
   meta.className = "metaRow";
   meta.appendChild(kindBadge(item.kind));
-  const bits = [];
-  if (item.source) bits.push(item.source);
-  bits.push(fmtMins(item.minutes));
-  if (withDate && item.date) bits.push(fmtShortDate(item.date));
   const s = document.createElement("span");
   s.className = "subNote";
-  s.textContent = bits.join(" · ");
+  const piece = (text, cls) => {
+    if (s.childNodes.length) s.append(" · ");
+    const b = document.createElement("span");
+    if (cls) b.className = cls;
+    b.textContent = text;
+    s.appendChild(b);
+  };
+  // A tweet's source is the tweeter's name, so it gets its own (larger, purple) styling.
+  if (item.source) piece(item.source, item.kind === "Tweet" ? "tweetName" : "");
+  piece(fmtMins(item.minutes), "dur");
+  if (withDate && item.date) piece(fmtShortDate(item.date), "");
   meta.appendChild(s);
   return meta;
 }
@@ -1961,7 +1974,7 @@ function openLinkDetail(id) {
 
   const meta = document.getElementById("lMeta");
   meta.innerHTML = "";
-  meta.append(...linkMetaRow(item, true).children);
+  meta.append(...linkMetaRow(item, true).childNodes);
   const open = document.getElementById("lOpen");
   open.href = item.url;
   document.getElementById("lTitle").value = item.title;
